@@ -103,7 +103,7 @@ public class GenerationManager : MonoBehaviour
 
         Mesh mesh = new Mesh();
 
-        mesh.vertices = localVerts;
+        mesh.vertices = localVerts; 
         mesh.triangles = convertTriTointArray(voronoi.GetSites());
 
         mesh.uv = UVs;// FlatShading(mesh.triangles);
@@ -120,10 +120,16 @@ public class GenerationManager : MonoBehaviour
         for (int i = 0; i < triList.Count; i+=3)
         {
             
-                // need a way to get a position in array for this site  
+                // need a way to get a position in array for this site  as X is just fundimenally incorrect 
                 triArray[currentArrayIndex] = (int)triList.SiteCoords()[i].x;
-                triArray[currentArrayIndex+1] = (int)triList.SiteCoords()[i+1].x;
-                triArray[currentArrayIndex+2] = (int)triList.SiteCoords()[i+2].x;
+            if (triList.SiteCoords().Count > i + 1)
+            {
+                triArray[currentArrayIndex + 1] = (int)triList.SiteCoords()[i + 1].x;
+                if (triList.SiteCoords().Count > i + 2)
+                {
+                    triArray[currentArrayIndex + 2] = (int)triList.SiteCoords()[i + 2].x;
+                }
+            }
                 currentArrayIndex += 3;
             
             
