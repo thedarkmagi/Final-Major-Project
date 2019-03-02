@@ -412,6 +412,15 @@ namespace Delaunay
 				return 1;
 			return 0;
 		}
+        public List<Triangle> GetTriangles()
+        {
+            return _triangles;
+        }
+        public SiteList GetSites()
+        {
+            return _sites;
+        }
 
+        
 	}
 }
