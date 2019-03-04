@@ -1,36 +1,29 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Delaunay;
-using Delaunay.Geo;
+using TriangleNet.Geometry;
+using TriangleNet.Topology;
 
 public class GenerationManager : MonoBehaviour
 {
+    TriangleNet.Mesh mesh;
+    Polygon polygon;
+    public int randomPoints;
+    public int xsize, ysize;
+    public int trianglesInChunk;
+    public Transform chunkPrefab;
+    private List<float> elevations = new List<float>();
+    public float persistance;
+    public int octaves;
+    public float frequencyBase = 2;
+    private float sampleSize = 1.0f;
+    private float elevationScale = 100.0f;
 
-    public int points = 300;
-
-    private List<Vector2> m_points;
-    private float m_mapWidth = 100;
-    private float m_mapHeight = 50;
-    private List<LineSegment> m_edges = null;
-    private List<LineSegment> m_spanningTree;
-    private List<LineSegment> m_delaunayTriangulation;
-
-    // TEST DATA
-    List<Vector3> vertices = new List<Vector3>();
-    MeshRenderer meshRenderer;
-    MeshFilter meshFilter;
-    GameObject meshObject;
-    public Material material;
-    Delaunay.Voronoi voronoi;
-    Vector3[] localVerts;
 
     // Start is called before the first frame update
     void Start()
     {
-        generateVoronoiDiagram(generateRandomPoints(points));
-
-        generateMeshTest();
+        generateMesh();
     }
 
     // Update is called once per frame
@@ -39,249 +32,131 @@ public class GenerationManager : MonoBehaviour
         
     }
 
-    List<Vector2> generateRandomPoints(int nPoints)
+    public void generateMesh()
     {
-        List<Vector2> newListVec2 = new List<Vector2>();
-        
-        for (int i = 0; i < nPoints; i++)
+        polygon = new Polygon();
+        for (int i = 0; i < randomPoints; i++)
         {
-            newListVec2.Add(new Vector2(Random.Range(0, m_mapWidth), Random.Range(0, m_mapHeight)));
+            polygon.Add(new Vertex(Random.Range(0.0f, xsize), Random.Range(0.0f, ysize)));
         }
-        return newListVec2;
-    }
+        TriangleNet.Meshing.ConstraintOptions options =
+            new TriangleNet.Meshing.ConstraintOptions() { ConformingDelaunay = true };
+        mesh = (TriangleNet.Mesh)polygon.Triangulate(options);
 
-    void generateVoronoiDiagram(List<Vector2> points)
-    {
-        List<uint> colors = new List<uint>();
-        for (int i = 0; i < points.Count; i++)
+
+        float[] seed = new float[octaves];
+
+        for (int i = 0; i < octaves; i++)
         {
-            colors.Add(0);
-        }
-        voronoi = new Delaunay.Voronoi(points, colors, new Rect(0, 0, m_mapWidth, m_mapHeight));
-        m_edges = voronoi.VoronoiDiagram();
-        m_spanningTree = voronoi.SpanningTree(KruskalType.MINIMUM);
-        m_delaunayTriangulation = voronoi.DelaunayTriangulation();
-        voronoi.SiteCoords();
-        
-        Delaunay.Geo.Polygon polygon = new Polygon(points);
-        //voronoi.Regions()[0][0].
-    }
-
-    int findVertPosInList(Vector2 vert)
-    {
-        for (int i = 0; i < localVerts.Length; i++)
-        {
-            if(vert.x == localVerts[i].x && vert.y == localVerts[i].z)
-            {
-                return i;
-            }
-        }
-            return 0;
-    }
-
-    Vector3[] generateVertList(List<LineSegment> list)
-    {
-        localVerts = new Vector3[list.Count];
-        Vector2[] UVs = new Vector2[list.Count];
-        for (int i = 0; i < list.Count; i+=2)
-        {
-            Vector2 xy = (Vector2)list[i].p0;
-            //vertices.Add(new Vector3(xy.x, 0, xy.y));
-            localVerts[i] = new Vector3(xy.x, 0, xy.y);
-            UVs[i] = xy;
-            xy = (Vector2)list[i].p1;
-            //vertices.Add(new Vector3(xy.x, 0,xy.y));
-            if (i + 1 < localVerts.Length)
-            {
-                localVerts[i + 1] = new Vector3(xy.x, 0, xy.y);
-                UVs[i + 1] = xy;
-
-            }
-        }
-
-        return localVerts;
-    }
-
-
-    Vector2[] generateVertList()
-    {
-        int indexSize=0;
-        for (int i = 0; i < voronoi.Regions().Count; i++)
-        {
-            foreach (var item in voronoi.Regions()[i])
-            {
-                indexSize++;
-                //Debug.Log(indexSize);
-            }
-        } //voronoi.Regions()
-
-        localVerts = new Vector3[indexSize];
-        Vector2[] UVs = new Vector2[indexSize];
-        indexSize = 0;
-        for (int i = 0; i < voronoi.Regions().Count; i++)
-        {
-            foreach (var item in voronoi.Regions()[i])
-            {
-                Vector2 xy = item;
-                Debug.Log(xy);
-                localVerts[indexSize] = new Vector3(xy.x, 0, xy.y);
-                UVs[indexSize] = xy;
-            }
+            seed[i] = Random.Range(0.0f, 100.0f);
         }
 
         
 
-        return UVs;
-    }
 
-    void generateMeshTest()
-    {
-        //Vector3[] localVerts = new Vector3[m_delaunayTriangulation.Count];
-        //Vector2[] UVs = new Vector2[m_delaunayTriangulation.Count];
-        //for (int i = 0; i < m_delaunayTriangulation.Count; i += 2)
-        //{
-        //    Vector2 xy = (Vector2)m_delaunayTriangulation[i].p0;
-        //    //vertices.Add(new Vector3(xy.x, 0, xy.y));
-        //    localVerts[i] = new Vector3(xy.x, 0, xy.y);
-        //    UVs[i] = xy;
-        //    xy = (Vector2)m_delaunayTriangulation[i].p1;
-        //    //vertices.Add(new Vector3(xy.x, 0,xy.y));
-        //    if (i + 1 < localVerts.Length)
-        //    {
-        //        localVerts[i + 1] = new Vector3(xy.x, 0, xy.y);
-        //        UVs[i+1] = xy;
-
-        //    }
-        //}
-        //generateVertList(voronoi.VoronoiDiagram());
-
-        //Vector3[] localVerts = new Vector3[voronoi.VoronoiDiagram().Count];
-        //Vector2[] UVs = new Vector2[voronoi.VoronoiDiagram().Count];
-        //int[] tris = new int[voronoi.VoronoiDiagram().Count];
-        //int triIndex = 0;
-        //for (int i = 0; i < voronoi.VoronoiDiagram().Count; i += 2)
-        //{
-        //    Vector2 xy = (Vector2)voronoi.VoronoiDiagram()[i].p0;
-        //    //vertices.Add(new Vector3(xy.x, 0, xy.y));
-        //    tris[i] = triIndex;
-        //    //voronoi.Region(xy);
-        //    List<Vector2> nextPoint = voronoi.NeighborSitesForSite(xy);
-        //    tris[i+1] = findVertPosInList(nextPoint[0]);
-        //    localVerts[i] = new Vector3(xy.x, 0, xy.y);
-        //    UVs[i] = xy;
-
-
-        //    xy = (Vector2)voronoi.VoronoiDiagram()[i].p1;
-        //    //vertices.Add(new Vector3(xy.x, 0,xy.y));
-        //    if (i + 1 < localVerts.Length)
-        //    {
-        //        nextPoint.Clear();
-        //        //voronoi.Region(xy);
-        //        nextPoint = voronoi.NeighborSitesForSite(xy);
-        //        tris[i + 2] = findVertPosInList(nextPoint[0]);
-        //        localVerts[i + 1] = new Vector3(xy.x, 0, xy.y);
-        //        UVs[i + 1] = xy;
-
-        //    }
-        //}
-
-        //Vector3[] localVerts = new Vector3[voronoi.SiteCoords().Count];
-        //Vector2[] UVs = new Vector2[voronoi.SiteCoords().Count];
-        //for (int i = 0; i < voronoi.SiteCoords().Count; i ++)
-        //{
-        //    Vector2 xy = voronoi.SiteCoords()[i]; 
-        //    //vertices.Add(new Vector3(xy.x, 0, xy.y));
-        //    localVerts[i] = new Vector3(xy.x, 0, xy.y);
-        //    UVs[i] = xy;
-        //    //UVs[i] = new Vector2(xy.x / 100.0f, xy.y / 100.0f);
-        //    //xy = voronoi.SiteCoords()[i+1];
-        //    ////vertices.Add(new Vector3(xy.x, 0,xy.y));
-        //    //localVerts[i + 1] = new Vector3(xy.x, 0, xy.y);
-        //}
-
-
-
-        Vector2[] UVs = generateVertList();
-
-        meshObject = new GameObject("TerrainChunk");
-        meshRenderer = meshObject.AddComponent<MeshRenderer>();
-        meshFilter = meshObject.AddComponent<MeshFilter>();
-
-        meshRenderer.material = material;
-
-        Mesh mesh = new Mesh();
-
-        mesh.vertices = localVerts;
-        //mesh.triangles = convertTriTointArray(voronoi.GetSites());
-        mesh.triangles = triArray();
-        mesh.uv = UVs;// FlatShading(mesh.triangles);
-
-        meshFilter.mesh = mesh;
-    }
-    int[] triArray()
-    {
-        int[] triArray = new int[localVerts.Length*3];
-        int triangleIndex = 0;
-        foreach (var item in localVerts)
+        foreach (Vertex vert in mesh.Vertices)
         {
-            triArray[triangleIndex] = triangleIndex;
-            triangleIndex++;
+            float elevation = 0.0f;
+            float amplitude = Mathf.Pow(persistance, octaves);
+            float frequency = 1.0f;
+            float maxVal = 0.0f;
+
+            for (int o = 0; o < octaves; o++)
+            {
+                float sample = (Mathf.PerlinNoise(seed[o] + (float)vert.x * sampleSize / (float)xsize * frequency,
+                    seed[o] + (float)vert.y * sampleSize / (float)ysize * frequency) - 0.5f) * amplitude;
+                elevation += sample;
+                maxVal += amplitude;
+                amplitude /= persistance;
+                frequency *= frequencyBase;
+            }
+            elevation = elevation / maxVal;
+            elevations.Add(elevation * elevationScale);
         }
 
-        return triArray;
 
+        MakeMesh();
     }
 
-    int[] convertTriTointArray(SiteList triList)
+    public void MakeMesh()
     {
-        //triList.Next()
-        int[] triArray = new int[ triList.Count*3];
-        int currentArrayIndex=0;
-        int triangleIndex=0;
-        for (int i = 0; i < triList.Count; i+=3)
-        {
+        //enumerator to conver triangles to array interface for indexing
+        IEnumerator<TriangleNet.Topology.Triangle> triangleEnumerator = mesh.Triangles.GetEnumerator();
 
-            // need a way to get a position in array for this site  as X is just fundimenally incorrect 
-            triArray[currentArrayIndex] = triangleIndex;//(int)triList.SiteCoords()[i].x;
-            triangleIndex++;
-            if (triList.SiteCoords().Count > i + 1)
+        // create more than one chunk if necessary
+        for (int chunkStart = 0; chunkStart < mesh.Triangles.Count; chunkStart += trianglesInChunk)
+        {
+            // vertices in unity mesh
+            List<Vector3> vertices = new List<Vector3>();
+
+            //per-vertex normals
+            List<Vector3> normals = new List<Vector3>();
+
+            //per-vertex uvs
+            List<Vector2> uvs = new List<Vector2>();
+
+            // triangles
+            List<int> triangles = new List<int>();
+
+            //iterate over all triangles until chunk size 
+            int chunkEnd = chunkStart + trianglesInChunk;
+            for (int i = chunkStart; i < chunkEnd; i++)
             {
-                triArray[currentArrayIndex + 1] = triangleIndex;//(int)triList.SiteCoords()[i + 1].x;
-                triangleIndex++;
-                if (triList.SiteCoords().Count > i + 2)
+                if (!triangleEnumerator.MoveNext())
                 {
-                    triArray[currentArrayIndex + 2] = triangleIndex;//(int)triList.SiteCoords()[i + 2].x;
-                    triangleIndex++;
+                    // last triangle 
+                    break;
                 }
+
+                // get current triangle 
+                Triangle triangle = triangleEnumerator.Current;
+
+                // triangles need to be wound backwards to be rightways up 
+                Vector3 v0 = GetPoint3D(triangle.vertices[2].id);
+                Vector3 v1 = GetPoint3D(triangle.vertices[1].id);
+                Vector3 v2 = GetPoint3D(triangle.vertices[0].id);
+
+                triangles.Add(vertices.Count);
+                triangles.Add(vertices.Count + 1);
+                triangles.Add(vertices.Count + 2);
+
+                vertices.Add(v0);
+                vertices.Add(v1);
+                vertices.Add(v2);
+
+                Vector3 normal = Vector3.Cross(v1 - v0, v2 - v0);
+                normals.Add(normal);
+                normals.Add(normal);
+                normals.Add(normal);
+
+                uvs.Add(new Vector2(0.0f, 0.0f));
+                uvs.Add(new Vector2(0.0f, 0.0f));
+                uvs.Add(new Vector2(0.0f, 0.0f));
             }
-                currentArrayIndex += 3;
-            
-            
+
+            UnityEngine.Mesh chunkMesh = new UnityEngine.Mesh();
+            chunkMesh.vertices = vertices.ToArray();
+            chunkMesh.uv = uvs.ToArray();
+            chunkMesh.triangles = triangles.ToArray();
+            chunkMesh.normals = normals.ToArray();
+
+            Transform chunk = Instantiate<Transform>(chunkPrefab, transform.position, transform.rotation);
+            chunk.GetComponent<MeshFilter>().mesh = chunkMesh;
+            chunk.GetComponent<MeshCollider>().sharedMesh = chunkMesh;
+            chunk.transform.parent = transform;
+
         }
-
-
-        return triArray;
     }
 
+    
 
-    // lazy code copied from prior mesh gen shit. just needed something for uv's 
-    Vector2[] FlatShading(int[] triangles)
+    //unsure If I will use this approach, seems lame
+    /* Returns a point's local coordinates. */
+    public Vector3 GetPoint3D(int index)
     {
-        Vector3[] flatShadedVertices = new Vector3[triangles.Length];
-        Vector2[] flatShadedUvs = new Vector2[triangles.Length];
-        Vector2[] uvs = new Vector2[triangles.Length * 3];
-
-        for (int i = 0; i < triangles.Length; i++)
-        {
-            //flatShadedVertices[i] = vertices[triangles[i]];
-            flatShadedUvs[i] = uvs[triangles[i]];
-            //triangles[i] = i;
-        }
-
-        //vertices = flatShadedVertices;
-        uvs = flatShadedUvs;
-
-        return uvs;
+        Vertex vertex = mesh.vertices[index];
+        float elevation = elevations[index];
+        return new Vector3((float)vertex.x, elevation, (float)vertex.y);
     }
 }
 

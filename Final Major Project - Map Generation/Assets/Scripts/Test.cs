@@ -6,9 +6,6 @@ using TriangleNet.Topology;
 
 public class Test : MonoBehaviour
 {
-    TriangleNet.Configuration c;
-    TriangleNet.Mesh m;
-    TriangleNet.Voronoi.StandardVoronoi V;
     TriangleNet.Mesh mesh;
     Polygon polygon;
     public int randomPoints;
@@ -25,16 +22,6 @@ public class Test : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        c = new TriangleNet.Configuration();
-        
-        m = new TriangleNet.Mesh(c);
-        m.bounds = new Rectangle(50, 50, 50, 50);
-        
-
-       V = new TriangleNet.Voronoi.StandardVoronoi(m);
-        
-        m.MakeVertexMap();
-
         polygon = new Polygon();
         for (int i = 0; i < randomPoints; i++)
         {
@@ -43,7 +30,8 @@ public class Test : MonoBehaviour
         TriangleNet.Meshing.ConstraintOptions options =
             new TriangleNet.Meshing.ConstraintOptions() { ConformingDelaunay = true };
         mesh = (TriangleNet.Mesh)polygon.Triangulate(options);
-
+       
+        
         float[] seed = new float[octaves];
 
         foreach(Vertex vert in mesh.Vertices)
