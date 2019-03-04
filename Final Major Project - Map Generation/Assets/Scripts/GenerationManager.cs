@@ -284,3 +284,26 @@ public class GenerationManager : MonoBehaviour
         return uvs;
     }
 }
+
+
+public class MeshData
+{
+    public Vector3[] vertices;
+    public int[] triangles;
+
+    int triangleIndex;
+
+    public MeshData(int nVerts)
+    {
+        vertices = new Vector3[nVerts];
+        triangles = new int[nVerts * 3];
+    }
+
+    public void AddTriangle(int a, int b, int c)
+    {
+        triangles[triangleIndex] = a;
+        triangles[triangleIndex+1] = b;
+        triangles[triangleIndex+2] = c;
+        triangleIndex += 3;
+    }
+}
