@@ -20,6 +20,8 @@ public class GenerationManager : MonoBehaviour
     private float elevationScale = 100.0f;
 
 
+    public HeightColours[] heightColours;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -71,43 +73,124 @@ public class GenerationManager : MonoBehaviour
                 amplitude /= persistance;
                 frequency *= frequencyBase;
             }
-            if(maxVal>0)
-            {
-                if(minVal > 0 && minVal>maxVal)
-                {
-                    minVal = maxVal;
-                }
-                if(maximumVal<maxVal)
-                {
-                    maximumVal = maxVal;
-                }
-            }
+
+            // unsure if needed? 
+            
+             if( minVal>=elevation)
+             {
+                 minVal = elevation;
+             }
+             if(maximumVal< elevation)
+             {
+                 maximumVal = elevation;
+             }
+            
+
+            float elevationUnmodified = elevation;
             elevation = elevation / maxVal;
-            elevations.Add(elevation * elevationScale);
-            colorMap.Add(Color.Lerp(Color.black, Color.white, elevations[elevations.Count-1]));
+            //elevations.Add(elevation * elevationScale);
+            //if (elevation  < 0.5)
+            //{
+            //colorMap.Add(Color.Lerp(Color.black, Color.white, elevation*elevationScale));
+            //colorMap.Add(colorSelector(elevation*elevationScale));
+            //}
+            //else
+            //{
+            //    colorMap.Add(Color.blue);
+            //}
         }
-
-
-
-        Color[] colourMap = new Color[xsize * ysize];
-        for (int y = 0; y < ysize; y++)
+        foreach (Vertex vert in mesh.Vertices)
         {
-            for (int x = 0; x < xsize; x++)
+            float elevation = 0.0f;
+            float amplitude = Mathf.Pow(persistance, octaves);
+            float frequency = 1.0f;
+            float maxVal = 0.0f;
+
+            for (int o = 0; o < octaves; o++)
             {
-                colourMap[y * ysize + x] = Color.Lerp(Color.black, Color.white, elevations[y + x]);
+                float sample = (Mathf.PerlinNoise(seed[o] + (float)vert.x * sampleSize / (float)xsize * frequency,
+                    seed[o] + (float)vert.y * sampleSize / (float)ysize * frequency) - 0.5f) * amplitude;
+                elevation += sample;
+                maxVal += amplitude;
+                amplitude /= persistance;
+                frequency *= frequencyBase;
             }
+
+           
+
+            float elevationUnmodified = elevation;
+            //elevation = elevation / maxVal;
+
+            elevation = (elevation - minVal) / (maximumVal - minVal);
+
+            elevations.Add(elevation * elevationScale);
+            //if (elevation  < 0.5)
+            //{
+            //colorMap.Add(Color.Lerp(Color.black, Color.white, elevation*elevationScale));
+            colorMap.Add(colorSelector(elevation ));
+            //}
+            //else
+            //{
+            //    colorMap.Add(Color.blue);
+            //}
         }
-        Texture2D texture = new Texture2D(randomPoints/xsize, randomPoints/ysize);
+        //Color[] colourMap = new Color[xsize * ysize];
+        //for (int y = 0; y < ysize; y++)
+        //{
+        //    for (int x = 0; x < xsize; x++)
+        //    {
+        //        colourMap[y * ysize + x] = Color.Lerp(Color.black, Color.white, elevations[y + x]);
+        //    }
+        //}
+
+        //colorMap = replaceColours(colorMap);
+        int textureSize = (int)Mathf.Floor( Mathf.Sqrt(colorMap.Count));
+
+        Texture2D texture = new Texture2D(textureSize, textureSize);
+        //Texture2D texture = new Texture2D(colorMap.Count/ colorMap.Count, colorMap.Count / colorMap.Count);
         texture.filterMode = FilterMode.Point;
         texture.wrapMode = TextureWrapMode.Clamp;
         texture.SetPixels(colorMap.ToArray());
         texture.Apply();
 
-        chunkPrefab.GetComponent<Renderer>().sharedMaterial.mainTexture = texture;
-
+        Renderer textureRenderer = chunkPrefab.GetComponent<Renderer>();//.sharedMaterial.mainTexture = texture;
+        textureRenderer.sharedMaterial.mainTexture = texture;
+        //textureRenderer.transform.localScale = new Vector3(texture.width, 1, texture.height) / 10f;
         MakeMesh();
     }
 
+    public Color colorSelector(float height)
+    {
+        Color resultColour = Color.red;
+        for (int i = 0; i < heightColours.Length; i++)
+        {
+            print(height);
+            if(height <= heightColours[i].height)
+            {
+                resultColour = heightColours[i].color;
+                print(resultColour);
+                break;
+            }
+
+        }
+
+        return resultColour;
+        //return Color.red;
+    }
+
+    public List<Color> replaceColours(List<Color> colourMap)
+    {
+        for (int i = 0; i < colourMap.Count; i++)
+        {
+            //print(colourMap[i]);
+            if(colourMap[i].maxColorComponent < 0.2)
+            {
+                print("OwO colours");
+                colourMap[i] = Color.blue;// new Color(1 / 255, 150 / 255, 255/255);
+            }
+        }
+        return colourMap;
+    }
     public void MakeMesh()
     {
         //enumerator to conver triangles to array interface for indexing
@@ -190,8 +273,15 @@ public class GenerationManager : MonoBehaviour
         return new Vector3((float)vertex.x, elevation, (float)vertex.y);
     }
 }
+[System.Serializable]
+public struct HeightColours
+{
+    public string name;
+    public float height;
+    public Color color;
+}
 
-
+// unused currently
 public class MeshData
 {
     public Vector3[] vertices;
