@@ -129,9 +129,10 @@ public class GenerationManager : MonoBehaviour
                 normals.Add(normal);
                 normals.Add(normal);
 
-                uvs.Add(new Vector2(0.0f, 0.0f));
-                uvs.Add(new Vector2(0.0f, 0.0f));
-                uvs.Add(new Vector2(0.0f, 0.0f));
+                //correctly calulates the UV's based on the position of the triangle
+                uvs.Add(new Vector2((float)triangle.vertices[0].x/xsize, (float)triangle.vertices[0].y / ysize));
+                uvs.Add(new Vector2((float)triangle.vertices[1].x / xsize, (float)triangle.vertices[1].y / ysize));
+                uvs.Add(new Vector2((float)triangle.vertices[2].x / xsize, (float)triangle.vertices[2].y / ysize));
             }
 
             UnityEngine.Mesh chunkMesh = new UnityEngine.Mesh();
