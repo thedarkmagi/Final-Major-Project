@@ -11,7 +11,7 @@ public class GenerationManager : MonoBehaviour
     public int randomPoints;
     public int xsize, ysize;
     public int trianglesInChunk;
-    public Transform chunkPrefab;
+    public GameObject chunkPrefab;
     private List<float> elevations = new List<float>();
     public float persistance;
     public int octaves;
@@ -51,9 +51,10 @@ public class GenerationManager : MonoBehaviour
             seed[i] = Random.Range(0.0f, 100.0f);
         }
 
-        
 
-
+        float minVal=0;
+        float maximumVal=0;
+        List<Color> colorMap = new List<Color>();
         foreach (Vertex vert in mesh.Vertices)
         {
             float elevation = 0.0f;
@@ -70,10 +71,39 @@ public class GenerationManager : MonoBehaviour
                 amplitude /= persistance;
                 frequency *= frequencyBase;
             }
+            if(maxVal>0)
+            {
+                if(minVal > 0 && minVal>maxVal)
+                {
+                    minVal = maxVal;
+                }
+                if(maximumVal<maxVal)
+                {
+                    maximumVal = maxVal;
+                }
+            }
             elevation = elevation / maxVal;
             elevations.Add(elevation * elevationScale);
+            colorMap.Add(Color.Lerp(Color.black, Color.white, elevations[elevations.Count-1]));
         }
 
+
+
+        Color[] colourMap = new Color[xsize * ysize];
+        for (int y = 0; y < ysize; y++)
+        {
+            for (int x = 0; x < xsize; x++)
+            {
+                colourMap[y * ysize + x] = Color.Lerp(Color.black, Color.white, elevations[y + x]);
+            }
+        }
+        Texture2D texture = new Texture2D(randomPoints/xsize, randomPoints/ysize);
+        texture.filterMode = FilterMode.Point;
+        texture.wrapMode = TextureWrapMode.Clamp;
+        texture.SetPixels(colorMap.ToArray());
+        texture.Apply();
+
+        chunkPrefab.GetComponent<Renderer>().sharedMaterial.mainTexture = texture;
 
         MakeMesh();
     }
@@ -141,7 +171,7 @@ public class GenerationManager : MonoBehaviour
             chunkMesh.triangles = triangles.ToArray();
             chunkMesh.normals = normals.ToArray();
 
-            Transform chunk = Instantiate<Transform>(chunkPrefab, transform.position, transform.rotation);
+            GameObject chunk = Instantiate<GameObject>(chunkPrefab, transform.position, transform.rotation);
             chunk.GetComponent<MeshFilter>().mesh = chunkMesh;
             chunk.GetComponent<MeshCollider>().sharedMesh = chunkMesh;
             chunk.transform.parent = transform;
