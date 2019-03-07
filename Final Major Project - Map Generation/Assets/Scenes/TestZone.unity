@@ -344,7 +344,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1422dd01454d5a749a1ee59e26822ca4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  randomPoints: 10000
+  randomPoints: 1000
   xsize: 2500
   ysize: 2500
   trianglesInChunk: 20000

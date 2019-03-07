@@ -270,8 +270,10 @@ public class GenerationManager : MonoBehaviour
             UnityEngine.Mesh chunkMesh = new UnityEngine.Mesh();
             chunkMesh.vertices = vertices.ToArray();
             chunkMesh.triangles = triangles.ToArray();
+            
             chunkMesh.uv = uvs.ToArray();
             chunkMesh.normals = normals.ToArray();
+           // chunkMesh.RecalculateNormals();
             // this just doesn't work
             //chunkMesh.uv = UnityEditor.Unwrapping.GeneratePerTriangleUV(chunkMesh);
             
