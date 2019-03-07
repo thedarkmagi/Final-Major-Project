@@ -17,8 +17,9 @@ public class GenerationManager : MonoBehaviour
     public int octaves;
     public float frequencyBase = 2;
     private float sampleSize = 1.0f;
-    private float elevationScale = 100.0f;
+    private float elevationScale = 200.0f;
 
+    public AnimationCurve terrainElevationScaling;
 
     public HeightColours[] heightColours;
 
@@ -93,6 +94,8 @@ public class GenerationManager : MonoBehaviour
 
         }
 
+
+        Color[] otherColourMap = new Color[elevationPreModified.Count];
         int elevationIndex = 0;
         foreach (Vertex vert in mesh.Vertices)
         {
@@ -113,17 +116,23 @@ public class GenerationManager : MonoBehaviour
 
 
             elevation = elevationPreModified[elevationIndex];
-            elevationIndex++;
+            
             float elevationUnmodified = elevation;
             //elevation = elevation / maxVal;
 
             elevation = (elevation - minVal) / (maximumVal - minVal);
 
-            elevations.Add(elevation * elevationScale);
+            elevation = terrainElevationScaling.Evaluate(elevation);
+
+            elevations.Add( (elevation * elevationScale));
+            //elevations.Add(elevation * (terrainElevationScaling.Evaluate(elevation) * elevationScale));
             //if (elevation  < 0.5)
             //{
             //colorMap.Add(Color.Lerp(Color.black, Color.white, elevation*elevationScale));
             colorMap.Add(colorSelector(elevation ));
+            otherColourMap[elevationIndex] = colorSelector(elevation);
+
+            elevationIndex++;
             //}
             //else
             //{
@@ -147,6 +156,7 @@ public class GenerationManager : MonoBehaviour
         texture.filterMode = FilterMode.Point;
         texture.wrapMode = TextureWrapMode.Clamp;
         texture.SetPixels(colorMap.ToArray());
+        //texture.SetPixels(otherColourMap);
         texture.Apply();
 
         Renderer textureRenderer = chunkPrefab.GetComponent<Renderer>();//.sharedMaterial.mainTexture = texture;
@@ -206,7 +216,7 @@ public class GenerationManager : MonoBehaviour
 
             // triangles
             List<int> triangles = new List<int>();
-
+            Bounds bounds = new Bounds( new Vector3((float)mesh.Bounds.Left- (float)mesh.Bounds.Right, (float)mesh.Bounds.Top - (float)mesh.Bounds.Bottom), new Vector3((float)mesh.Bounds.Width,(float)mesh.Bounds.Height));
             //iterate over all triangles until chunk size 
             int chunkEnd = chunkStart + trianglesInChunk;
             for (int i = chunkStart; i < chunkEnd; i++)
@@ -238,17 +248,33 @@ public class GenerationManager : MonoBehaviour
                 normals.Add(normal);
                 normals.Add(normal);
 
-                //correctly calulates the UV's based on the position of the triangle
-                uvs.Add(new Vector2((float)triangle.vertices[0].x/xsize, (float)triangle.vertices[0].y / ysize));
-                uvs.Add(new Vector2((float)triangle.vertices[1].x / xsize, (float)triangle.vertices[1].y / ysize));
-                uvs.Add(new Vector2((float)triangle.vertices[2].x / xsize, (float)triangle.vertices[2].y / ysize));
+                ////correctly calulates the UV's based on the position of the triangle
+                //uvs.Add(new Vector2((float)triangle.vertices[0].x / xsize, (float)triangle.vertices[0].y / ysize));
+                //uvs.Add(new Vector2((float)triangle.vertices[1].x / xsize, (float)triangle.vertices[1].y / ysize));
+                //uvs.Add(new Vector2((float)triangle.vertices[2].x / xsize, (float)triangle.vertices[2].y / ysize));
+
+                //uvs.Add(new Vector2((float)triangle.vertices[0].x / bounds.size.x, (float)triangle.vertices[0].y / bounds.size.y));
+                //uvs.Add(new Vector2((float)triangle.vertices[1].x / bounds.size.x, (float)triangle.vertices[1].y / bounds.size.y));
+                //uvs.Add(new Vector2((float)triangle.vertices[2].x / bounds.size.x, (float)triangle.vertices[2].y / bounds.size.y));
+
+
+                //uvs.Add(new Vector2((float)triangle.vertices[2].x / xsize, (float)triangle.vertices[2].y / ysize));
+                //uvs.Add(new Vector2((float)triangle.vertices[1].x / xsize, (float)triangle.vertices[1].y / ysize));
+                //uvs.Add(new Vector2((float)triangle.vertices[0].x / xsize, (float)triangle.vertices[0].y / ysize));
+
+                uvs.Add(new Vector2((float)triangle.vertices[2].x / bounds.size.x, (float)triangle.vertices[2].y / bounds.size.y));
+                uvs.Add(new Vector2((float)triangle.vertices[1].x / bounds.size.x, (float)triangle.vertices[1].y / bounds.size.y));
+                uvs.Add(new Vector2((float)triangle.vertices[0].x / bounds.size.x, (float)triangle.vertices[0].y / bounds.size.y));
             }
 
             UnityEngine.Mesh chunkMesh = new UnityEngine.Mesh();
             chunkMesh.vertices = vertices.ToArray();
-            chunkMesh.uv = uvs.ToArray();
             chunkMesh.triangles = triangles.ToArray();
+            chunkMesh.uv = uvs.ToArray();
             chunkMesh.normals = normals.ToArray();
+            // this just doesn't work
+            //chunkMesh.uv = UnityEditor.Unwrapping.GeneratePerTriangleUV(chunkMesh);
+            
 
             GameObject chunk = Instantiate<GameObject>(chunkPrefab, transform.position, transform.rotation);
             chunk.GetComponent<MeshFilter>().mesh = chunkMesh;
@@ -273,6 +299,7 @@ public class GenerationManager : MonoBehaviour
 public struct HeightColours
 {
     public string name;
+    [Range(0,1)]
     public float height;
     public Color color;
 }
