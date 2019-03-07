@@ -57,6 +57,7 @@ public class GenerationManager : MonoBehaviour
         float minVal=0;
         float maximumVal=0;
         List<Color> colorMap = new List<Color>();
+        List<float> elevationPreModified = new List<float>();
         foreach (Vertex vert in mesh.Vertices)
         {
             float elevation = 0.0f;
@@ -88,17 +89,11 @@ public class GenerationManager : MonoBehaviour
 
             float elevationUnmodified = elevation;
             elevation = elevation / maxVal;
-            //elevations.Add(elevation * elevationScale);
-            //if (elevation  < 0.5)
-            //{
-            //colorMap.Add(Color.Lerp(Color.black, Color.white, elevation*elevationScale));
-            //colorMap.Add(colorSelector(elevation*elevationScale));
-            //}
-            //else
-            //{
-            //    colorMap.Add(Color.blue);
-            //}
+            elevationPreModified.Add(elevation);
+
         }
+
+        int elevationIndex = 0;
         foreach (Vertex vert in mesh.Vertices)
         {
             float elevation = 0.0f;
@@ -106,18 +101,19 @@ public class GenerationManager : MonoBehaviour
             float frequency = 1.0f;
             float maxVal = 0.0f;
 
-            for (int o = 0; o < octaves; o++)
-            {
-                float sample = (Mathf.PerlinNoise(seed[o] + (float)vert.x * sampleSize / (float)xsize * frequency,
-                    seed[o] + (float)vert.y * sampleSize / (float)ysize * frequency) - 0.5f) * amplitude;
-                elevation += sample;
-                maxVal += amplitude;
-                amplitude /= persistance;
-                frequency *= frequencyBase;
-            }
+            //for (int o = 0; o < octaves; o++)
+            //{
+            //    float sample = (Mathf.PerlinNoise(seed[o] + (float)vert.x * sampleSize / (float)xsize * frequency,
+            //        seed[o] + (float)vert.y * sampleSize / (float)ysize * frequency) - 0.5f) * amplitude;
+            //    elevation += sample;
+            //    maxVal += amplitude;
+            //    amplitude /= persistance;
+            //    frequency *= frequencyBase;
+            //}
 
-           
 
+            elevation = elevationPreModified[elevationIndex];
+            elevationIndex++;
             float elevationUnmodified = elevation;
             //elevation = elevation / maxVal;
 
