@@ -16,8 +16,8 @@ public class GenerationManager : MonoBehaviour
     public float persistance;
     public int octaves;
     public float frequencyBase = 2;
-    private float sampleSize = 1.0f;
-    private float elevationScale = 200.0f;
+    public float sampleSize = 1.0f;
+    public float elevationScale = 200.0f;
 
     public AnimationCurve terrainElevationScaling;
 
@@ -261,19 +261,6 @@ public class GenerationManager : MonoBehaviour
                 normals.Add(normal);
 
                 ////correctly calulates the UV's based on the position of the triangle
-                //uvs.Add(new Vector2((float)triangle.vertices[0].x / xsize, (float)triangle.vertices[0].y / ysize));
-                //uvs.Add(new Vector2((float)triangle.vertices[1].x / xsize, (float)triangle.vertices[1].y / ysize));
-                //uvs.Add(new Vector2((float)triangle.vertices[2].x / xsize, (float)triangle.vertices[2].y / ysize));
-
-                //uvs.Add(new Vector2((float)triangle.vertices[0].x / bounds.size.x, (float)triangle.vertices[0].y / bounds.size.y));
-                //uvs.Add(new Vector2((float)triangle.vertices[1].x / bounds.size.x, (float)triangle.vertices[1].y / bounds.size.y));
-                //uvs.Add(new Vector2((float)triangle.vertices[2].x / bounds.size.x, (float)triangle.vertices[2].y / bounds.size.y));
-
-
-                //uvs.Add(new Vector2((float)triangle.vertices[2].x / xsize, (float)triangle.vertices[2].y / ysize));
-                //uvs.Add(new Vector2((float)triangle.vertices[1].x / xsize, (float)triangle.vertices[1].y / ysize));
-                //uvs.Add(new Vector2((float)triangle.vertices[0].x / xsize, (float)triangle.vertices[0].y / ysize));
-
                 uvs.Add(new Vector2((float)triangle.vertices[2].x / bounds.size.x, (float)triangle.vertices[2].y / bounds.size.y));
                 uvs.Add(new Vector2((float)triangle.vertices[1].x / bounds.size.x, (float)triangle.vertices[1].y / bounds.size.y));
                 uvs.Add(new Vector2((float)triangle.vertices[0].x / bounds.size.x, (float)triangle.vertices[0].y / bounds.size.y));

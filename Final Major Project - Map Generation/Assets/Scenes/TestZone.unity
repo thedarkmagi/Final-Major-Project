@@ -353,6 +353,8 @@ MonoBehaviour:
   persistance: 0.6
   octaves: 8
   frequencyBase: 2
+  sampleSize: 1
+  elevationScale: 200
   terrainElevationScaling:
     serializedVersion: 2
     m_Curve:
