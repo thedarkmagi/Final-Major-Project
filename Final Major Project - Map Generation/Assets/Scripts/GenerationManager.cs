@@ -48,10 +48,11 @@ public class GenerationManager : MonoBehaviour
 
 
         float[] seed = new float[octaves];
-
+        float[] seedForSecondPerlin = new float[octaves];
         for (int i = 0; i < octaves; i++)
         {
             seed[i] = Random.Range(0.0f, 100.0f);
+            seedForSecondPerlin[i] = Random.Range(0.0f, 100.0f);
         }
 
 
@@ -75,7 +76,9 @@ public class GenerationManager : MonoBehaviour
                 amplitude /= persistance;
                 frequency *= frequencyBase;
             }
-
+            float islandSample = Mathf.PerlinNoise(seedForSecondPerlin[0] + (float)vert.x, seedForSecondPerlin[0] + (float)vert.y);
+            elevation += islandSample;
+            elevation = elevation / 2.0f;
             // unsure if needed? 
             
              if( minVal>=elevation)
@@ -122,9 +125,9 @@ public class GenerationManager : MonoBehaviour
 
             elevation = (elevation - minVal) / (maximumVal - minVal);
 
-            elevation = terrainElevationScaling.Evaluate(elevation);
+            float terrainScale = terrainElevationScaling.Evaluate(elevation);
 
-            elevations.Add( (elevation * elevationScale));
+            elevations.Add( (elevation * (terrainScale * elevationScale)));
             //elevations.Add(elevation * (terrainElevationScaling.Evaluate(elevation) * elevationScale));
             //if (elevation  < 0.5)
             //{
