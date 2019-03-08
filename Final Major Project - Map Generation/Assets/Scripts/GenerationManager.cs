@@ -161,6 +161,9 @@ public class GenerationManager : MonoBehaviour
 
         Renderer textureRenderer = chunkPrefab.GetComponent<Renderer>();//.sharedMaterial.mainTexture = texture;
         textureRenderer.sharedMaterial.mainTexture = texture;
+        //textureRenderer.sharedMaterial.SetVector("MinHeight", maximumVal);
+        textureRenderer.sharedMaterial.SetFloat("MinHeight", minVal);
+        textureRenderer.sharedMaterial.SetFloat("MaxHeight", maximumVal);
         //textureRenderer.transform.localScale = new Vector3(texture.width, 1, texture.height) / 10f;
         MakeMesh();
     }
