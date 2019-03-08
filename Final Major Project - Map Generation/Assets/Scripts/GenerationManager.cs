@@ -66,7 +66,7 @@ public class GenerationManager : MonoBehaviour
             float amplitude = Mathf.Pow(persistance, octaves);
             float frequency = 1.0f;
             float maxVal = 0.0f;
-
+            float islandSample = 0;
             for (int o = 0; o < octaves; o++)
             {
                 float sample = (Mathf.PerlinNoise(seed[o] + (float)vert.x * sampleSize / (float)xsize * frequency,
@@ -75,8 +75,14 @@ public class GenerationManager : MonoBehaviour
                 maxVal += amplitude;
                 amplitude /= persistance;
                 frequency *= frequencyBase;
+                islandSample += (Mathf.PerlinNoise(seed[0] + (float)vert.x * sampleSize / (float)xsize,
+                    seed[0] + (float)vert.y * sampleSize / (float)ysize ) );
+
             }
-            float islandSample = Mathf.PerlinNoise(seedForSecondPerlin[0] + (float)vert.x, seedForSecondPerlin[0] + (float)vert.y);
+            //float islandSample = Mathf.PerlinNoise(seedForSecondPerlin[0] + (float)vert.x, seedForSecondPerlin[0] + (float)vert.y);
+            //float islandSample = (Mathf.PerlinNoise(seed[0] + (float)vert.x * sampleSize / (float)xsize * frequency,
+                   
+
             elevation += islandSample;
             elevation = elevation / 2.0f;
             // unsure if needed? 

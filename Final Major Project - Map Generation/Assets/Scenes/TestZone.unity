@@ -345,9 +345,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   randomPoints: 1000
-  xsize: 2500
-  ysize: 2500
-  trianglesInChunk: 20000
+  xsize: 250
+  ysize: 250
+  trianglesInChunk: 2000
   chunkPrefab: {fileID: 6526229473254058089, guid: ba85a655acb709143a94e40f34dd9711,
     type: 3}
   persistance: 0.6
@@ -358,50 +358,23 @@ MonoBehaviour:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0.0012207031
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
+      value: 0
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
       weightedMode: 0
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 0.17591843
-      value: 0.0022583455
-      inSlope: 0.0049827704
-      outSlope: 0.0049827704
-      tangentMode: 0
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
       weightedMode: 0
-      inWeight: 0.0796775
-      outWeight: 0.17898507
-    - serializedVersion: 3
-      time: 0.6325268
-      value: 0.41677523
-      inSlope: 0.32799646
-      outSlope: 0.32799646
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.08054374
-    - serializedVersion: 3
-      time: 0.89728653
-      value: 0.58937204
-      inSlope: 0.98815686
-      outSlope: 0.98815686
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.4143037
-      outWeight: 0.15353148
-    - serializedVersion: 3
-      time: 1.0000558
-      value: 1.0000063
-      inSlope: -0.06389283
-      outSlope: -0.06389283
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.39301273
+      inWeight: 0
       outWeight: 0
-    m_PreInfinity: 1
+    m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
   heightColours:
