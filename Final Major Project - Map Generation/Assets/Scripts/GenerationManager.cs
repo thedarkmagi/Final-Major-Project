@@ -3,9 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using TriangleNet.Geometry;
 using TriangleNet.Topology;
+using System;
 
 public class GenerationManager : MonoBehaviour
 {
+    System.Random seededRandom; 
+    System.Random seededRandom2;
+    public int seed;
+
     TriangleNet.Mesh mesh;
     Polygon polygon;
     public int randomPoints;
@@ -26,6 +31,8 @@ public class GenerationManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        seededRandom = new System.Random(seed);
+        seededRandom2 = new System.Random(seed+1);
         generateMesh();
     }
 
@@ -40,7 +47,8 @@ public class GenerationManager : MonoBehaviour
         polygon = new Polygon();
         for (int i = 0; i < randomPoints; i++)
         {
-            polygon.Add(new Vertex(Random.Range(0.0f, xsize), Random.Range(0.0f, ysize)));
+            polygon.Add(new Vertex(seededRandom.Next(0, xsize), seededRandom.Next(0,ysize) )); 
+            //polygon.Add(new Vertex(Random.Range(0.0f, xsize), Random.Range(0.0f, ysize))); 
         }
         TriangleNet.Meshing.ConstraintOptions options =
             new TriangleNet.Meshing.ConstraintOptions() { ConformingDelaunay = true };
@@ -51,8 +59,10 @@ public class GenerationManager : MonoBehaviour
         float[] seedForSecondPerlin = new float[octaves];
         for (int i = 0; i < octaves; i++)
         {
-            seed[i] = Random.Range(0.0f, 100.0f);
-            seedForSecondPerlin[i] = Random.Range(0.0f, 100.0f);
+            //seed[i] = Random.Range(0.0f, 100.0f);
+            //seedForSecondPerlin[i] = Random.Range(0.0f, 100.0f);
+            seed[i] = seededRandom.Next(0, 100);
+            seedForSecondPerlin[i] = seededRandom2.Next(0, 100);
         }
 
 
@@ -148,32 +158,21 @@ public class GenerationManager : MonoBehaviour
             //    colorMap.Add(Color.blue);
             //}
         }
-        //Color[] colourMap = new Color[xsize * ysize];
-        //for (int y = 0; y < ysize; y++)
-        //{
-        //    for (int x = 0; x < xsize; x++)
-        //    {
-        //        colourMap[y * ysize + x] = Color.Lerp(Color.black, Color.white, elevations[y + x]);
-        //    }
-        //}
 
-        //colorMap = replaceColours(colorMap);
         int textureSize = (int)Mathf.Floor( Mathf.Sqrt(colorMap.Count));
 
         Texture2D texture = new Texture2D(textureSize, textureSize);
-        //Texture2D texture = new Texture2D(colorMap.Count/ colorMap.Count, colorMap.Count / colorMap.Count);
         texture.filterMode = FilterMode.Point;
         texture.wrapMode = TextureWrapMode.Clamp;
         texture.SetPixels(colorMap.ToArray());
         //texture.SetPixels(otherColourMap);
         texture.Apply();
 
-        Renderer textureRenderer = chunkPrefab.GetComponent<Renderer>();//.sharedMaterial.mainTexture = texture;
+        Renderer textureRenderer = chunkPrefab.GetComponent<Renderer>();
         textureRenderer.sharedMaterial.mainTexture = texture;
-        //textureRenderer.sharedMaterial.SetVector("MinHeight", maximumVal);
         textureRenderer.sharedMaterial.SetFloat("MinHeight", minVal);
         textureRenderer.sharedMaterial.SetFloat("MaxHeight", maximumVal);
-        //textureRenderer.transform.localScale = new Vector3(texture.width, 1, texture.height) / 10f;
+
         MakeMesh();
     }
 
