@@ -27,13 +27,25 @@ public class GenerationManager : MonoBehaviour
     public AnimationCurve terrainElevationScaling;
 
     public HeightColours[] heightColours;
+    public int nChunks;
 
     // Start is called before the first frame update
     void Start()
     {
         seededRandom = new System.Random(seed);
         seededRandom2 = new System.Random(seed+1);
-        generateMesh();
+
+        for (int i = 0; i < nChunks; i++)
+        {
+            if( i==0 )generateMesh(0,0);
+            else
+            {
+                generateMesh(xsize * i, ysize * i);
+                //stop it being diagonal 
+            }
+        
+        }
+        
     }
 
     // Update is called once per frame
@@ -42,9 +54,11 @@ public class GenerationManager : MonoBehaviour
         
     }
 
-    public void generateMesh()
+    public void generateMesh(int xOffSet, int yOffSet)
     {
+        elevations.Clear();
         polygon = new Polygon();
+        mesh = null;
         for (int i = 0; i < randomPoints; i++)
         {
             polygon.Add(new Vertex(seededRandom.Next(0, xsize), seededRandom.Next(0,ysize) )); 
@@ -173,7 +187,7 @@ public class GenerationManager : MonoBehaviour
         textureRenderer.sharedMaterial.SetFloat("MinHeight", minVal);
         textureRenderer.sharedMaterial.SetFloat("MaxHeight", maximumVal);
 
-        MakeMesh();
+        MakeMesh(xOffSet,yOffSet);
     }
 
     public Color colorSelector(float height)
@@ -208,7 +222,7 @@ public class GenerationManager : MonoBehaviour
         }
         return colourMap;
     }
-    public void MakeMesh()
+    public void MakeMesh(int xOffSet, int yOffSet)
     {
         //enumerator to conver triangles to array interface for indexing
         IEnumerator<TriangleNet.Topology.Triangle> triangleEnumerator = mesh.Triangles.GetEnumerator();
@@ -276,7 +290,8 @@ public class GenerationManager : MonoBehaviour
             //chunkMesh.uv = UnityEditor.Unwrapping.GeneratePerTriangleUV(chunkMesh);
             
 
-            GameObject chunk = Instantiate<GameObject>(chunkPrefab, transform.position, transform.rotation);
+            //GameObject chunk = Instantiate<GameObject>(chunkPrefab, transform.position, transform.rotation);
+            GameObject chunk = Instantiate(chunkPrefab, new Vector3(transform.position.x+xOffSet,transform.position.y,transform.position.z + yOffSet) , transform.rotation);
             chunk.GetComponent<MeshFilter>().mesh = chunkMesh;
             chunk.GetComponent<MeshCollider>().sharedMesh = chunkMesh;
             chunk.transform.parent = transform;
