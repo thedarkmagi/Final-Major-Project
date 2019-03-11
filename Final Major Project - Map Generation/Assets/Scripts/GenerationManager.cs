@@ -28,6 +28,9 @@ public class GenerationManager : MonoBehaviour
 
     public HeightColours[] heightColours;
     public int nChunks;
+    public int chunkWidth;
+
+    public GameObject plane;
 
     // Start is called before the first frame update
     void Start()
@@ -37,12 +40,14 @@ public class GenerationManager : MonoBehaviour
 
         for (int i = 0; i < nChunks; i++)
         {
-            if( i==0 )generateMesh(0,0);
-            else
-            {
-                generateMesh(xsize * i, ysize * i);
-                //stop it being diagonal 
-            }
+
+           for (int j = 0; j < chunkWidth; j++)
+           {
+               //generateMesh(xsize * j, ysize * i);
+               generateMesh(xsize * i, ysize * j);
+
+           }
+           //generateMesh(xsize * i, ysize * i);
         
         }
         
@@ -134,19 +139,6 @@ public class GenerationManager : MonoBehaviour
         {
             float elevation = 0.0f;
             float amplitude = Mathf.Pow(persistance, octaves);
-            float frequency = 1.0f;
-            float maxVal = 0.0f;
-
-            //for (int o = 0; o < octaves; o++)
-            //{
-            //    float sample = (Mathf.PerlinNoise(seed[o] + (float)vert.x * sampleSize / (float)xsize * frequency,
-            //        seed[o] + (float)vert.y * sampleSize / (float)ysize * frequency) - 0.5f) * amplitude;
-            //    elevation += sample;
-            //    maxVal += amplitude;
-            //    amplitude /= persistance;
-            //    frequency *= frequencyBase;
-            //}
-
 
             elevation = elevationPreModified[elevationIndex];
             
@@ -166,11 +158,7 @@ public class GenerationManager : MonoBehaviour
             otherColourMap[elevationIndex] = colorSelector(elevation);
 
             elevationIndex++;
-            //}
-            //else
-            //{
-            //    colorMap.Add(Color.blue);
-            //}
+
         }
 
         int textureSize = (int)Mathf.Floor( Mathf.Sqrt(colorMap.Count));
@@ -188,6 +176,11 @@ public class GenerationManager : MonoBehaviour
         textureRenderer.sharedMaterial.SetFloat("MaxHeight", maximumVal);
 
         MakeMesh(xOffSet,yOffSet);
+    }
+    public Color grayScaleSelector(float height)
+    {
+        Color result = new Color(height, height, height);
+        return result;
     }
 
     public Color colorSelector(float height)
