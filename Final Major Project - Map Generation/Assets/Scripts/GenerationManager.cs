@@ -153,8 +153,9 @@ public class GenerationManager : MonoBehaviour
             //elevations.Add(elevation * (terrainElevationScaling.Evaluate(elevation) * elevationScale));
             //if (elevation  < 0.5)
             //{
-            //colorMap.Add(Color.Lerp(Color.black, Color.white, elevation*elevationScale));
-            colorMap.Add(colorSelector(elevation ));
+            colorMap.Add(Color.Lerp(Color.black, Color.white, elevation));
+            //colorMap.Add(colorSelector(elevation ));
+            //colorMap.Add(grayScaleSelector(elevation));
             otherColourMap[elevationIndex] = colorSelector(elevation);
 
             elevationIndex++;
@@ -170,7 +171,8 @@ public class GenerationManager : MonoBehaviour
         //texture.SetPixels(otherColourMap);
         texture.Apply();
 
-        Renderer textureRenderer = chunkPrefab.GetComponent<Renderer>();
+        //Renderer textureRenderer = chunkPrefab.GetComponent<Renderer>();
+        Renderer textureRenderer = plane.GetComponent<Renderer>();
         textureRenderer.sharedMaterial.mainTexture = texture;
         textureRenderer.sharedMaterial.SetFloat("MinHeight", minVal);
         textureRenderer.sharedMaterial.SetFloat("MaxHeight", maximumVal);
@@ -215,6 +217,7 @@ public class GenerationManager : MonoBehaviour
         }
         return colourMap;
     }
+
     public void MakeMesh(int xOffSet, int yOffSet)
     {
         //enumerator to conver triangles to array interface for indexing
@@ -292,9 +295,6 @@ public class GenerationManager : MonoBehaviour
         }
     }
 
-    
-
-    //unsure If I will use this approach, seems lame
     /* Returns a point's local coordinates. */
     public Vector3 GetPoint3D(int index)
     {
