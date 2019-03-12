@@ -43,8 +43,8 @@ public class GenerationManager : MonoBehaviour
         {
             //seed[i] = Random.Range(0.0f, 100.0f);
             //seedForSecondPerlin[i] = Random.Range(0.0f, 100.0f);
-            seedForPeriln[i] = seededRandom.Next(0, 100);
-            seedForSecondPerlin[i] = seededRandom2.Next(0, 100);
+            seedForPeriln[i] = seededRandom.Next(10, 1000) / 10.0f;
+            seedForSecondPerlin[i] = seededRandom2.Next(10, 1000)/10.0f;
         }
 
         for (int i = 0; i < nChunks; i++)
@@ -161,7 +161,7 @@ public class GenerationManager : MonoBehaviour
             elevation = (elevation - minVal) / (maximumVal - minVal);
 
             float terrainScale = terrainElevationScaling.Evaluate(elevation);
-
+            //print(elevation);
             elevations.Add( (elevation * (terrainScale * elevationScale)));
             //elevations.Add(elevation * (terrainElevationScaling.Evaluate(elevation) * elevationScale));
             //if (elevation  < 0.5)
@@ -174,7 +174,7 @@ public class GenerationManager : MonoBehaviour
             elevationIndex++;
 
         }
-
+        //print("end of chunk");
         int textureSize = (int)Mathf.Floor( Mathf.Sqrt(colorMap.Count));
 
         Texture2D texture = new Texture2D(textureSize, textureSize);
@@ -184,8 +184,8 @@ public class GenerationManager : MonoBehaviour
         //texture.SetPixels(otherColourMap);
         texture.Apply();
 
-        //Renderer textureRenderer = chunkPrefab.GetComponent<Renderer>();
-        Renderer textureRenderer = plane.GetComponent<Renderer>();
+        Renderer textureRenderer = chunkPrefab.GetComponent<Renderer>();
+        //Renderer textureRenderer = plane.GetComponent<Renderer>();
         textureRenderer.sharedMaterial.mainTexture = texture;
         textureRenderer.sharedMaterial.SetFloat("MinHeight", minVal);
         textureRenderer.sharedMaterial.SetFloat("MaxHeight", maximumVal);
@@ -203,11 +203,11 @@ public class GenerationManager : MonoBehaviour
         Color resultColour = Color.red;
         for (int i = 0; i < heightColours.Length; i++)
         {
-            print(height);
+            //print(height);
             if(height <= heightColours[i].height)
             {
                 resultColour = heightColours[i].color;
-                print(resultColour);
+                //print(resultColour);
                 break;
             }
 
@@ -217,19 +217,7 @@ public class GenerationManager : MonoBehaviour
         //return Color.red;
     }
 
-    public List<Color> replaceColours(List<Color> colourMap)
-    {
-        for (int i = 0; i < colourMap.Count; i++)
-        {
-            //print(colourMap[i]);
-            if(colourMap[i].maxColorComponent < 0.2)
-            {
-                print("OwO colours");
-                colourMap[i] = Color.blue;// new Color(1 / 255, 150 / 255, 255/255);
-            }
-        }
-        return colourMap;
-    }
+
 
     public void MakeMesh(int xOffSet, int yOffSet)
     {
