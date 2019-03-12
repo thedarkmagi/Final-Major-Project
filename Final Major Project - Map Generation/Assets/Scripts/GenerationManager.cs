@@ -37,6 +37,15 @@ public class GenerationManager : MonoBehaviour
     {
         seededRandom = new System.Random(seed);
         seededRandom2 = new System.Random(seed+1);
+        float[] seedForPeriln = new float[octaves];
+        float[] seedForSecondPerlin = new float[octaves];
+        for (int i = 0; i < octaves; i++)
+        {
+            //seed[i] = Random.Range(0.0f, 100.0f);
+            //seedForSecondPerlin[i] = Random.Range(0.0f, 100.0f);
+            seedForPeriln[i] = seededRandom.Next(0, 100);
+            seedForSecondPerlin[i] = seededRandom2.Next(0, 100);
+        }
 
         for (int i = 0; i < nChunks; i++)
         {
@@ -44,7 +53,7 @@ public class GenerationManager : MonoBehaviour
            for (int j = 0; j < chunkWidth; j++)
            {
                //generateMesh(xsize * j, ysize * i);
-               generateMesh(xsize * i, ysize * j);
+               generateMesh(xsize * i, ysize * j, seedForPeriln, seedForSecondPerlin);
 
            }
            //generateMesh(xsize * i, ysize * i);
@@ -59,7 +68,7 @@ public class GenerationManager : MonoBehaviour
         
     }
 
-    public void generateMesh(int xOffSet, int yOffSet)
+    public void generateMesh(int xOffSet, int yOffSet, float[] seed, float[] seedForSecondPerlin)
     {
         elevations.Clear();
         polygon = new Polygon();
@@ -74,15 +83,15 @@ public class GenerationManager : MonoBehaviour
         mesh = (TriangleNet.Mesh)polygon.Triangulate(options);
 
 
-        float[] seed = new float[octaves];
-        float[] seedForSecondPerlin = new float[octaves];
-        for (int i = 0; i < octaves; i++)
-        {
-            //seed[i] = Random.Range(0.0f, 100.0f);
-            //seedForSecondPerlin[i] = Random.Range(0.0f, 100.0f);
-            seed[i] = seededRandom.Next(0, 100);
-            seedForSecondPerlin[i] = seededRandom2.Next(0, 100);
-        }
+        //float[] seed = new float[octaves];
+        //float[] seedForSecondPerlin = new float[octaves];
+        //for (int i = 0; i < octaves; i++)
+        //{
+        //    //seed[i] = Random.Range(0.0f, 100.0f);
+        //    //seedForSecondPerlin[i] = Random.Range(0.0f, 100.0f);
+        //    seed[i] = seededRandom.Next(0, 100);
+        //    seedForSecondPerlin[i] = seededRandom2.Next(0, 100);
+        //}
 
 
         float minVal=0;
@@ -98,14 +107,18 @@ public class GenerationManager : MonoBehaviour
             float islandSample = 0;
             for (int o = 0; o < octaves; o++)
             {
-                float sample = (Mathf.PerlinNoise(seed[o] + (float)vert.x * sampleSize / (float)xsize * frequency,
-                    seed[o] + (float)vert.y * sampleSize / (float)ysize * frequency) - 0.5f) * amplitude;
+                float sample = (Mathf.PerlinNoise(seed[o] + ((float)vert.x+xOffSet) * sampleSize / (float)xsize * frequency,
+                    seed[o] + ((float)vert.y+yOffSet) * sampleSize / (float)ysize * frequency) - 0.5f) * amplitude;
+                //islandSample += (Mathf.PerlinNoise(seedForSecondPerlin[o] + ((float)vert.x + xOffSet) * sampleSize / (float)xsize * frequency,
+                //    seedForSecondPerlin[o] + ((float)vert.y + yOffSet) * sampleSize / (float)ysize * frequency)-0.5f )*amplitude;
+
+                islandSample += (Mathf.PerlinNoise(seedForSecondPerlin[o] + ((float)vert.x + xOffSet) * sampleSize / (float)xsize ,
+                    seedForSecondPerlin[o] + ((float)vert.y + yOffSet) * sampleSize / (float)ysize ) - 0.5f);
                 elevation += sample;
                 maxVal += amplitude;
                 amplitude /= persistance;
                 frequency *= frequencyBase;
-                islandSample += (Mathf.PerlinNoise(seed[0] + (float)vert.x * sampleSize / (float)xsize,
-                    seed[0] + (float)vert.y * sampleSize / (float)ysize ) );
+                
 
             }
             //float islandSample = Mathf.PerlinNoise(seedForSecondPerlin[0] + (float)vert.x, seedForSecondPerlin[0] + (float)vert.y);
