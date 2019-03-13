@@ -19,11 +19,26 @@ public class VoronoiGeneration : MonoBehaviour
 
     //
     private Bounds meshBounds;
+    public int chunksPerEdge;
 
     // Start is called before the first frame update
     void Start()
     {
-        generateMesh();
+
+        for (int i = 0; i < chunksPerEdge; i++)
+        {
+
+            for (int j = 0; j < chunksPerEdge; j++)
+            {
+                //generateMesh(xsize * j, ysize * i);
+                generateMesh(xsize * i, ysize * j);
+
+            }
+            //generateMesh(xsize * i, ysize * i);
+
+        }
+
+        //generateMesh();
     }
 
     // Update is called once per frame
@@ -32,7 +47,7 @@ public class VoronoiGeneration : MonoBehaviour
         
     }
 
-    void generateMesh()
+    void generateMesh(int xOffSet, int yOffSet)
     {
         polygon = new Polygon();
         mesh = null;
@@ -44,12 +59,12 @@ public class VoronoiGeneration : MonoBehaviour
         TriangleNet.Meshing.ConstraintOptions options =
             new TriangleNet.Meshing.ConstraintOptions() { ConformingDelaunay = true };
         mesh = (TriangleNet.Mesh)polygon.Triangulate(options);
-        
+
         meshBounds = new Bounds(new Vector3((float)mesh.Bounds.Left- (float)mesh.Bounds.Right , (float)mesh.Bounds.Top - (float)mesh.Bounds.Bottom), new Vector3((float)mesh.Bounds.Width, (float)mesh.Bounds.Height));
 
         foreach (Vertex vert in mesh.Vertices)
         {
-            float sample = Mathf.PerlinNoise((float)vert.x, (float)vert.y);
+            float sample = Mathf.PerlinNoise((float)vert.x+xOffSet, (float)vert.y+yOffSet);
             sample = defineIsland(sample);
             //sample = forceIslands(vert,sample);
 
@@ -60,7 +75,7 @@ public class VoronoiGeneration : MonoBehaviour
         textureRenderer.sharedMaterial.SetFloat("MinHeight", 0);
         textureRenderer.sharedMaterial.SetFloat("MaxHeight", maxMeshHeight);
 
-        MakeMesh(0, 0);
+        MakeMesh(xOffSet, yOffSet);
 
     }
 
@@ -126,7 +141,7 @@ public class VoronoiGeneration : MonoBehaviour
 
                 // get current triangle 
                 Triangle triangle = triangleEnumerator.Current;
-
+                
                 // triangles need to be wound backwards to be rightways up 
                 Vector3 v0 = GetPoint3D(triangle.vertices[2].id);
                 Vector3 v1 = GetPoint3D(triangle.vertices[1].id);
@@ -158,8 +173,8 @@ public class VoronoiGeneration : MonoBehaviour
             chunkMesh.uv = uvs.ToArray();
             chunkMesh.normals = normals.ToArray();
 
-            GameObject chunk = Instantiate<GameObject>(chunkPrefab, transform.position, transform.rotation);
-            //GameObject chunk = Instantiate(chunkPrefab, new Vector3(transform.position.x + xOffSet, transform.position.y, transform.position.z + yOffSet), transform.rotation);
+            //GameObject chunk = Instantiate<GameObject>(chunkPrefab, transform.position, transform.rotation);
+            GameObject chunk = Instantiate(chunkPrefab, new Vector3(transform.position.x + xOffSet, transform.position.y, transform.position.z + yOffSet), transform.rotation);
             chunk.GetComponent<MeshFilter>().mesh = chunkMesh;
             chunk.GetComponent<MeshCollider>().sharedMesh = chunkMesh;
             chunk.transform.parent = transform;
