@@ -23,7 +23,7 @@ namespace TriangleNet.Geometry
 #endif
         internal VertexType type;
         internal Otri tri;
-
+        public BiomeType biomeType;
         /// <summary>
         /// Initializes a new instance of the <see cref="Vertex" /> class.
         /// </summary>

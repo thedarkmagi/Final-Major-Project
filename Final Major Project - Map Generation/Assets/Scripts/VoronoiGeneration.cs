@@ -20,32 +20,23 @@ public class VoronoiGeneration : MonoBehaviour
     //
     private Bounds meshBounds;
     public int chunksPerEdge;
+    public bool displayTrianglesGizmos;
+    public bool displayVoronoiGizmos;
+    private TriangleNet.Voronoi.BoundedVoronoi boundedVoronoi;
+    
 
     // Start is called before the first frame update
     void Start()
     {
-
         for (int i = 0; i < chunksPerEdge; i++)
         {
-
             for (int j = 0; j < chunksPerEdge; j++)
             {
-                //generateMesh(xsize * j, ysize * i);
                 generateMesh(xsize * i, ysize * j);
-
             }
-            //generateMesh(xsize * i, ysize * i);
-
         }
-
-        //generateMesh();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 
     void generateMesh(int xOffSet, int yOffSet)
     {
@@ -59,17 +50,28 @@ public class VoronoiGeneration : MonoBehaviour
         TriangleNet.Meshing.ConstraintOptions options =
             new TriangleNet.Meshing.ConstraintOptions() { ConformingDelaunay = true };
         mesh = (TriangleNet.Mesh)polygon.Triangulate(options);
+        boundedVoronoi = new TriangleNet.Voronoi.BoundedVoronoi(mesh);
 
         meshBounds = new Bounds(new Vector3((float)mesh.Bounds.Left- (float)mesh.Bounds.Right , (float)mesh.Bounds.Top - (float)mesh.Bounds.Bottom), new Vector3((float)mesh.Bounds.Width, (float)mesh.Bounds.Height));
 
-        foreach (Vertex vert in mesh.Vertices)
+
+        for (int i = 0; i < mesh.vertices.Count; i++)
         {
-            float sample = Mathf.PerlinNoise((float)vert.x+xOffSet, (float)vert.y+yOffSet);
-            sample = defineIsland(sample);
-            //sample = forceIslands(vert,sample);
+            float sample = Mathf.PerlinNoise((float)mesh.vertices[i].x + xOffSet, (float)mesh.vertices[i].y + yOffSet);
+            sample = defineIsland(sample, mesh.vertices[i]);
 
             elevations.Add(sample);
         }
+
+        //foreach (Vertex vert in mesh.Vertices)
+        //{
+        //    float sample = Mathf.PerlinNoise((float)vert.x+xOffSet, (float)vert.y+yOffSet);
+        //    sample = defineIsland(sample);
+        //    //sample = defineFlat(sample);
+        //    //sample = forceIslands(vert,sample);
+
+        //    elevations.Add(sample);
+        //}
 
         Renderer textureRenderer = chunkPrefab.GetComponent<Renderer>();
         textureRenderer.sharedMaterial.SetFloat("MinHeight", 0);
@@ -91,7 +93,24 @@ public class VoronoiGeneration : MonoBehaviour
         }
         return height;
     }
-
+    float defineIsland(float height, Vertex vertex)
+    {
+        if (height > 0.5f)
+        {
+            height = maxMeshHeight;
+            vertex.biomeType = BiomeType.land;
+        }
+        else
+        {
+            height = 0;
+            vertex.biomeType = BiomeType.water;
+        }
+        return height;
+    }
+    float defineFlat(float height)
+    {
+        return 0;
+    }
     //float forceIslands(Vertex vert, float height)
     //{
     //    Vector3 point = new Vector3((float)vert.x, (float)vert.y,0);
@@ -128,6 +147,9 @@ public class VoronoiGeneration : MonoBehaviour
 
             // triangles
             List<int> triangles = new List<int>();
+
+            //vertex colours
+            List<Color> vertColors = new List<Color>();
             //Bounds bounds = new Bounds(new Vector3((float)mesh.Bounds.Left - (float)mesh.Bounds.Right, (float)mesh.Bounds.Top - (float)mesh.Bounds.Bottom), new Vector3((float)mesh.Bounds.Width, (float)mesh.Bounds.Height));
             //iterate over all triangles until chunk size 
             int chunkEnd = chunkStart + trianglesInChunk;
@@ -155,6 +177,15 @@ public class VoronoiGeneration : MonoBehaviour
                 vertices.Add(v1);
                 vertices.Add(v2);
 
+                vertColors.Add(getVertColour(v0));
+                vertColors.Add(getVertColour(v1));
+                vertColors.Add(getVertColour(v2));
+
+                //this will need more work, need to get mesh vert form triangle.id to be passed in
+                //vertColors.Add(getBiomeType(triangle.vertices[2])); 
+                //vertColors.Add(getVertColour(v1));
+                //vertColors.Add(getVertColour(v2));
+
                 Vector3 normal = Vector3.Cross(v1 - v0, v2 - v0);
                 normals.Add(normal);
                 normals.Add(normal);
@@ -172,7 +203,7 @@ public class VoronoiGeneration : MonoBehaviour
 
             chunkMesh.uv = uvs.ToArray();
             chunkMesh.normals = normals.ToArray();
-
+            chunkMesh.colors = vertColors.ToArray();
             //GameObject chunk = Instantiate<GameObject>(chunkPrefab, transform.position, transform.rotation);
             GameObject chunk = Instantiate(chunkPrefab, new Vector3(transform.position.x + xOffSet, transform.position.y, transform.position.z + yOffSet), transform.rotation);
             chunk.GetComponent<MeshFilter>().mesh = chunkMesh;
@@ -187,5 +218,72 @@ public class VoronoiGeneration : MonoBehaviour
         Vertex vertex = mesh.vertices[index];
         float elevation = elevations[index];
         return new Vector3((float)vertex.x, elevation, (float)vertex.y);
+    }
+
+    public Color getVertColour(Vector3 point)
+    {
+        if(point.y<=0)
+        {
+            return Color.blue;
+        }
+        else
+        {
+            return Color.green;
+        }
+    }
+    public Color getBiomeType(Vertex vert)
+    {
+        Color result = new Color();
+        switch (vert.biomeType)
+        {
+            case BiomeType.ocean:
+                result= Color.blue;
+                break;
+            case BiomeType.water:
+                result = Color.blue;
+                break;
+            case BiomeType.land:
+                result = Color.green;
+                break;
+            case BiomeType.mountain:
+                result = Color.gray;
+                break;
+            default:
+                break;
+        }
+        return result;
+    }
+    // draw lines
+    public void OnDrawGizmos()
+    {
+        if (mesh == null)
+        {
+            // We're probably in the editor
+            return;
+        }
+        if (displayTrianglesGizmos)
+        {
+            Gizmos.color = Color.red;
+            foreach (Edge edge in mesh.Edges)
+            {
+                Vertex v0 = mesh.vertices[edge.P0];
+                Vertex v1 = mesh.vertices[edge.P1];
+                Vector3 p0 = new Vector3((float)v0.x, 0.0f, (float)v0.y);
+                Vector3 p1 = new Vector3((float)v1.x, 0.0f, (float)v1.y);
+                Gizmos.DrawLine(p0, p1);
+            }
+        }
+        if (displayVoronoiGizmos)
+        {
+            Gizmos.color = Color.black;
+            foreach (Edge edge in boundedVoronoi.Edges)
+            {
+                var v0 = boundedVoronoi.Vertices[edge.P0];
+                var v1 = boundedVoronoi.Vertices[edge.P1];
+                Vector3 p0 = new Vector3((float)v0.x, 0.0f, (float)v0.y);
+                Vector3 p1 = new Vector3((float)v1.x, 0.0f, (float)v1.y);
+                Gizmos.DrawLine(p0, p1);
+            }
+        }
     }
 }
