@@ -231,6 +231,7 @@ MonoBehaviour:
   chunkPrefab: {fileID: 6526229473254058089, guid: ba85a655acb709143a94e40f34dd9711,
     type: 3}
   waterBoarderPercentage: 0.9
+  minimumHeightForLand: 0.1
   chunksPerEdge: 1
   displayTrianglesGizmos: 0
   displayVoronoiGizmos: 0

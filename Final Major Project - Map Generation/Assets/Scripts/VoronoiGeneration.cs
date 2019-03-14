@@ -16,6 +16,7 @@ public class VoronoiGeneration : MonoBehaviour
     private List<float> elevations = new List<float>();
     private float maxMeshHeight = 10;
     public float waterBoarderPercentage;
+    public float minimumHeightForLand;
     //
     private Bounds meshBounds;
     public int chunksPerEdge;
@@ -75,7 +76,7 @@ public class VoronoiGeneration : MonoBehaviour
 
     float defineIsland(float height)
     {
-        if (height > 0.5f)
+        if (height > minimumHeightForLand)
         {
             height = maxMeshHeight;
         }
@@ -99,9 +100,53 @@ public class VoronoiGeneration : MonoBehaviour
         }
         return height;
     }
-
+    // entire function is probably a bust
+    //bool isPointEnclosedInWater(Dictionary<int, Vertex> vertices, int id)
+    //{
+    //    int nPointsAroundWater=0;
+    //    for (int i = 0; i < vertices[id].tri.Triangle.vertices.Length; i++)
+    //    {
+    //        if (vertices[id].tri.Triangle.vertices[i].biomeType == BiomeType.water)
+    //        {
+    //            nPointsAroundWater++;
+    //        }
+    //        else if(vertices[id].tri.Triangle.vertices[i].biomeType != BiomeType.water)
+    //        {
+    //            break;
+    //        }
+    //        else // this seems very dangerous as an approach. although unsure on how else to search through this structure. 
+    //        {
+    //            print("neighbors");
+    //            for (int j = 0; j < vertices[id].tri.Triangle.neighbors.Length; j++)
+    //            {
+    //                print("triangles");
+    //                for (int k = 0; k < vertices[id].tri.Triangle.neighbors[j].Triangle.vertices.Length; k++)
+    //                {
+    //                    if (vertices[id].tri.Triangle.neighbors[j].Triangle.vertices[k].biomeType == BiomeType.water)
+    //                    {
+    //                        nPointsAroundWater++;
+    //                    }
+    //                    else
+    //                    {
+    //                        break;
+    //                    }
+    //                }
+    //            }
+    //        }
+    //    }
+    //    if(nPointsAroundWater>3)
+    //    {
+    //        return true;
+    //    }
+    //    return false;
+    //}
     void findMountainPeak(Dictionary<int,Vertex> vertices)
     {
+        //use this to work out if the vert isn't connected to current island?? 
+        //if(vertices[ vertices[0].tri.Triangle.neighbors[0].tri.vertices[0].id].biomeType == BiomeType.water)
+        //{
+
+        //}
         int vertIndex = 0;
         float furthestFromCoast = 0;
         for (int land = 0; land < vertices.Count; land++)
@@ -109,6 +154,7 @@ public class VoronoiGeneration : MonoBehaviour
             float distanceFromCoast = float.MinValue;
             if(vertices[land].biomeType !=BiomeType.water)
             {
+                isPointEnclosedInWater(vertices, land);
                 for(int water =0; water<vertices.Count;water++)
                 {
                     if(vertices[water].biomeType == BiomeType.water)
@@ -126,7 +172,7 @@ public class VoronoiGeneration : MonoBehaviour
                 }
             }
         }
-        elevations[vertIndex] = 1000;
+        elevations[vertIndex] = 50;
     }
     float distanceFromWater(Vertex land, Vertex water)
     {
