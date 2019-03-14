@@ -15,7 +15,7 @@ public class VoronoiGeneration : MonoBehaviour
     public GameObject chunkPrefab;
     private List<float> elevations = new List<float>();
     private float maxMeshHeight = 10;
-
+    public float waterBoarderPercentage;
     //
     private Bounds meshBounds;
     public int chunksPerEdge;
@@ -52,11 +52,12 @@ public class VoronoiGeneration : MonoBehaviour
         boundedVoronoi = new TriangleNet.Voronoi.BoundedVoronoi(mesh);
 
         meshBounds = new Bounds(new Vector3((float)mesh.Bounds.Left- (float)mesh.Bounds.Right , (float)mesh.Bounds.Top - (float)mesh.Bounds.Bottom), new Vector3((float)mesh.Bounds.Width, (float)mesh.Bounds.Height));
-
+        //print(meshBounds.extents);
 
         for (int i = 0; i < mesh.vertices.Count; i++)
         {
             float sample = Mathf.PerlinNoise((float)mesh.vertices[i].x + xOffSet, (float)mesh.vertices[i].y + yOffSet);
+            print("vertextPosition:" + (float)mesh.vertices[i].x + " " + (float)mesh.vertices[i].y);
             sample = defineIsland(sample, mesh.vertices[i]);
 
             elevations.Add(sample);
@@ -86,7 +87,7 @@ public class VoronoiGeneration : MonoBehaviour
     }
     float defineIsland(float height, Vertex vertex)
     {
-        if (height > 0.5f)
+        if (height > 0.5f && !enforceWaterEdge(vertex))
         {
             height = maxMeshHeight;
             vertex.biomeType = BiomeType.land;
@@ -131,14 +132,25 @@ public class VoronoiGeneration : MonoBehaviour
     {
         Vector2 landVert = new Vector2((float)land.x, (float)land.y);
         Vector2 waterVert = new Vector2((float)water.x, (float)water.y);
-
-
-
         return Vector2.Distance(landVert,waterVert);
     }
     float defineFlat(float height)
     {
         return 0;
+    }
+    bool enforceWaterEdge(Vertex vert)
+    {
+        float leftLimits, rightLimits, topLimits, bottomLimits;
+        leftLimits = meshBounds.size.x - meshBounds.size.x * waterBoarderPercentage;
+        rightLimits = meshBounds.size.x * waterBoarderPercentage;
+        topLimits = meshBounds.size.y - meshBounds.size.y * waterBoarderPercentage;
+        bottomLimits = meshBounds.size.y * waterBoarderPercentage;
+        if(vert.x < leftLimits||vert.x>rightLimits || vert.y <topLimits || vert.y >bottomLimits)
+        {
+            return true;
+        }
+
+        return false;
     }
     //float forceIslands(Vertex vert, float height)
     //{
