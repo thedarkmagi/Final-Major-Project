@@ -16,7 +16,6 @@ public class VoronoiGeneration : MonoBehaviour
     private List<float> elevations = new List<float>();
     private float maxMeshHeight = 10;
 
-
     //
     private Bounds meshBounds;
     public int chunksPerEdge;
@@ -63,15 +62,7 @@ public class VoronoiGeneration : MonoBehaviour
             elevations.Add(sample);
         }
 
-        //foreach (Vertex vert in mesh.Vertices)
-        //{
-        //    float sample = Mathf.PerlinNoise((float)vert.x+xOffSet, (float)vert.y+yOffSet);
-        //    sample = defineIsland(sample);
-        //    //sample = defineFlat(sample);
-        //    //sample = forceIslands(vert,sample);
-
-        //    elevations.Add(sample);
-        //}
+        findMountainPeak(mesh.vertices);
 
         Renderer textureRenderer = chunkPrefab.GetComponent<Renderer>();
         textureRenderer.sharedMaterial.SetFloat("MinHeight", 0);
@@ -106,6 +97,44 @@ public class VoronoiGeneration : MonoBehaviour
             vertex.biomeType = BiomeType.water;
         }
         return height;
+    }
+
+    void findMountainPeak(Dictionary<int,Vertex> vertices)
+    {
+        int vertIndex = 0;
+        float furthestFromCoast = 0;
+        for (int land = 0; land < vertices.Count; land++)
+        {
+            float distanceFromCoast = float.MinValue;
+            if(vertices[land].biomeType !=BiomeType.water)
+            {
+                for(int water =0; water<vertices.Count;water++)
+                {
+                    if(vertices[water].biomeType == BiomeType.water)
+                    {
+                        if(distanceFromWater(vertices[land],vertices[water])>distanceFromCoast)
+                        {
+                            distanceFromCoast = distanceFromWater(vertices[land], vertices[water]);  
+                        }
+                    }
+                }
+                if(distanceFromCoast>furthestFromCoast)
+                {
+                    furthestFromCoast = distanceFromCoast;
+                    vertIndex = land;
+                }
+            }
+        }
+        elevations[vertIndex] = 1000;
+    }
+    float distanceFromWater(Vertex land, Vertex water)
+    {
+        Vector2 landVert = new Vector2((float)land.x, (float)land.y);
+        Vector2 waterVert = new Vector2((float)water.x, (float)water.y);
+
+
+
+        return Vector2.Distance(landVert,waterVert);
     }
     float defineFlat(float height)
     {
