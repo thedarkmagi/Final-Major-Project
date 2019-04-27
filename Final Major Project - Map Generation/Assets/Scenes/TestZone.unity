@@ -235,6 +235,7 @@ MonoBehaviour:
   chunksPerEdge: 1
   displayTrianglesGizmos: 0
   displayVoronoiGizmos: 0
+  circleGradient: {fileID: 2800000, guid: ecd60a4d1811f6a4aaaf172b8694d170, type: 3}
 --- !u!1 &1103894224
 GameObject:
   m_ObjectHideFlags: 0

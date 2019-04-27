@@ -23,7 +23,8 @@ public class VoronoiGeneration : MonoBehaviour
     public bool displayTrianglesGizmos;
     public bool displayVoronoiGizmos;
     private TriangleNet.Voronoi.BoundedVoronoi boundedVoronoi;
-    
+
+    public Texture2D circleGradient;
 
     // Start is called before the first frame update
     void Start()
@@ -37,6 +38,12 @@ public class VoronoiGeneration : MonoBehaviour
         }
     }
 
+
+    float normalise( float number, float min, float max, float scaledMin, float scaledMax)
+    {
+        float result = (scaledMax - scaledMin) * (number - min) / (max - min) + scaledMin;
+        return result;
+    }
 
     void generateMesh(int xOffSet, int yOffSet)
     {
@@ -55,15 +62,33 @@ public class VoronoiGeneration : MonoBehaviour
         meshBounds = new Bounds(new Vector3((float)mesh.Bounds.Left- (float)mesh.Bounds.Right , (float)mesh.Bounds.Top - (float)mesh.Bounds.Bottom), new Vector3((float)mesh.Bounds.Width, (float)mesh.Bounds.Height));
         //print(meshBounds.extents);
 
+        int min = 0;
+        int max = 1024;
+        int maxX = 0;
+        int maxY = 0;
+        
         for (int i = 0; i < mesh.vertices.Count; i++)
         {
-            float sample = Mathf.PerlinNoise((float)mesh.vertices[i].x + xOffSet, (float)mesh.vertices[i].y + yOffSet);
-            print("vertextPosition:" + (float)mesh.vertices[i].x + " " + (float)mesh.vertices[i].y);
+            //float sample = Mathf.PerlinNoise((float)mesh.vertices[i].x + xOffSet, (float)mesh.vertices[i].y + yOffSet);
+            //print("vertextPosition:" + (float)mesh.vertices[i].x + " " + (float)mesh.vertices[i].y);
+
+            
+
+            int x = Mathf.FloorToInt(normalise((float)mesh.vertices[i].x , min, xsize, min,max));
+            int y = Mathf.FloorToInt(normalise((float)mesh.vertices[i].y , min, ysize, min, max));
+            maxX = Mathf.Max(x, maxX);
+            maxY = Mathf.Max(y, maxY);
+            
+            float sample = circleGradient.GetPixel(x, y).grayscale;
+            if (sample > 0)
+            {
+                //print("vertex: " + i + " X:" + x + " Y:" + y + " Sampled value: " + sample);
+            }
             sample = defineIsland(sample, mesh.vertices[i]);
 
             elevations.Add(sample);
         }
-
+        print("Max X: " + maxX + " Max Y: " + maxY);
         findMountainPeak(mesh.vertices);
 
         Renderer textureRenderer = chunkPrefab.GetComponent<Renderer>();
@@ -88,7 +113,7 @@ public class VoronoiGeneration : MonoBehaviour
     }
     float defineIsland(float height, Vertex vertex)
     {
-        if (height > 0.5f && !enforceWaterEdge(vertex))
+        if (height > 0.9f && !enforceWaterEdge(vertex))
         {
             height = maxMeshHeight;
             vertex.biomeType = BiomeType.land;
@@ -154,7 +179,7 @@ public class VoronoiGeneration : MonoBehaviour
             float distanceFromCoast = float.MinValue;
             if(vertices[land].biomeType !=BiomeType.water)
             {
-                isPointEnclosedInWater(vertices, land);
+                //isPointEnclosedInWater(vertices, land);
                 for(int water =0; water<vertices.Count;water++)
                 {
                     if(vertices[water].biomeType == BiomeType.water)
