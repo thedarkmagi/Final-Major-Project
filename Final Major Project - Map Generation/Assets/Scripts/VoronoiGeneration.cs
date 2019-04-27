@@ -6,6 +6,7 @@ using TriangleNet.Topology;
 
 public class VoronoiGeneration : MonoBehaviour
 {
+    private const float islandHeight = 0.9f;
     TriangleNet.Mesh mesh;
     TriangleNet.Mesh shrunkMesh;
     Polygon polygon;
@@ -113,7 +114,7 @@ public class VoronoiGeneration : MonoBehaviour
     }
     float defineIsland(float height, Vertex vertex)
     {
-        if (height > 0.9f && !enforceWaterEdge(vertex))
+        if (height > islandHeight && !enforceWaterEdge(vertex))
         {
             height = maxMeshHeight;
             vertex.biomeType = BiomeType.land;
@@ -309,6 +310,8 @@ public class VoronoiGeneration : MonoBehaviour
                 uvs.Add(new Vector2((float)triangle.vertices[0].x / meshBounds.size.x, (float)triangle.vertices[0].y / meshBounds.size.y));
             }
 
+            
+
             UnityEngine.Mesh chunkMesh = new UnityEngine.Mesh();
             chunkMesh.vertices = vertices.ToArray();
             chunkMesh.triangles = triangles.ToArray();
@@ -316,6 +319,12 @@ public class VoronoiGeneration : MonoBehaviour
             chunkMesh.uv = uvs.ToArray();
             chunkMesh.normals = normals.ToArray();
             chunkMesh.colors = vertColors.ToArray();
+
+            Dictionary<int, BiomeType> vertBiomes = new Dictionary<int, BiomeType>();
+            VertexConnection[] vertCons = findVertConnections(chunkMesh);
+            vertBiomes = setVertBiomes(vertCons, chunkMesh);
+            List<int>borderVerts = findBorderVerts(vertCons, vertBiomes, chunkMesh, BiomeType.land, BiomeType.water);
+            printList(borderVerts);
             //GameObject chunk = Instantiate<GameObject>(chunkPrefab, transform.position, transform.rotation);
             GameObject chunk = Instantiate(chunkPrefab, new Vector3(transform.position.x + xOffSet, transform.position.y, transform.position.z + yOffSet), transform.rotation);
             chunk.GetComponent<MeshFilter>().mesh = chunkMesh;
@@ -323,7 +332,13 @@ public class VoronoiGeneration : MonoBehaviour
             chunk.transform.parent = transform;
         }
     }
-
+    public void printList<T>(List<T> list)
+    {
+        for (int i = 0; i < list.Count; i++)
+        {
+            print(list[i]);
+        }
+    }
     /* Returns a point's local coordinates. */
     public Vector3 GetPoint3D(int index)
     {
@@ -364,6 +379,125 @@ public class VoronoiGeneration : MonoBehaviour
                 break;
         }
         return result;
+    }
+    public class VertexConnection
+    {
+        public List<int> connections = new List<int>();
+    }
+    //credit this function if it works 
+    VertexConnection[] findVertConnections(Mesh mesh)
+    {
+        Vector3[] vertices = mesh.vertices;
+        VertexConnection[] connections = new VertexConnection[vertices.Length];
+
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            var P1 = vertices[i];
+            var VC1 = connections[i];
+            for (int n = i + 1; n < vertices.Length; n++)
+            {
+                if (P1 == vertices[n])
+                {
+                    var VC2 = connections[n];
+                    if (VC2 == null)
+                        VC2 = connections[n] = new VertexConnection();
+                    if (VC1 == null)
+                        VC1 = connections[i] = new VertexConnection();
+                    VC1.connections.Add(n);
+                    VC2.connections.Add(i);
+                }
+            }
+        }
+        return connections;
+    }
+    Dictionary<int, BiomeType> setVertBiomes(VertexConnection[] vertCons, Mesh mesh)
+    {
+        Dictionary<int, BiomeType> result = new Dictionary<int, BiomeType>();
+        for (int i = 0; i < vertCons.Length; i++)
+        {
+            if (vertCons[i]!=null)
+            {
+                if (vertCons[i].connections != null)
+                {
+                    for (int j = 0; j < vertCons[i].connections.Count; j++)
+                    {
+                        result[i] = setBiomeType(mesh.vertices[vertCons[i].connections[j]].y);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+    BiomeType setBiomeType(float height)
+    {
+        if (height > islandHeight)
+            return BiomeType.land;
+        else
+            return BiomeType.water;
+    }
+
+    bool checkSurroundingVertsBiomes(VertexConnection[] vertCons, Dictionary<int, BiomeType> vertBiomes, int vertIndex, BiomeType targetBiome )
+    {
+        bool result = true;
+        for (int i = 0; i < vertCons[vertIndex].connections.Count; i++)
+        {
+            if (vertCons[vertIndex].connections != null)
+            {
+                if (vertBiomes[vertCons[vertIndex].connections[i]] != targetBiome)
+                {
+                    result = false;
+                    break;
+                }
+            }
+
+        }
+        return result;
+    }
+    //function currently never results in true. 
+    bool findTransitionVerts(VertexConnection[] vertCons, Dictionary<int, BiomeType> vertBiomes, int vertIndex, BiomeType targetBiome, BiomeType secondTargetBiome)
+    {
+        bool result = false;
+        bool biomeOne = false;
+        bool biomeTwo = false;
+        if (vertCons[vertIndex] != null)
+        {
+            if (vertCons[vertIndex].connections != null)
+            {
+                for (int i = 0; i < vertCons[vertIndex].connections.Count; i++)
+                {
+
+                    if (vertBiomes[vertCons[vertIndex].connections[i]] == targetBiome)
+                    {
+                        biomeOne = true;
+                    }
+                    else if (vertBiomes[vertCons[vertIndex].connections[i]] == secondTargetBiome)
+                    {
+                        biomeTwo = true;
+                    }
+
+                    if (biomeOne && biomeTwo)
+                    {
+                        result = true;
+                        break;
+                    }
+                }
+            }
+        }
+        return result;
+    }
+    List<int> findBorderVerts(VertexConnection[] vertCons, Dictionary<int, BiomeType> vertBiomes, Mesh mesh, BiomeType targetBiome, BiomeType secondTargetBiome)
+    {
+        List<int> borderVerts = new List<int>();
+        for (int i = 0; i < mesh.vertices.Length; i++)
+        {
+            if(findTransitionVerts(vertCons,vertBiomes, i,targetBiome,secondTargetBiome))
+            {
+                print(i);
+                borderVerts.Add(i);
+            }
+        }
+        
+        return borderVerts;
     }
     // draw lines
     public void OnDrawGizmos()
