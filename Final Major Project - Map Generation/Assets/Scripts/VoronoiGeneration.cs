@@ -40,7 +40,7 @@ public class VoronoiGeneration : MonoBehaviour
     }
 
 
-    float normalise( float number, float min, float max, float scaledMin, float scaledMax)
+    float normalise(float number, float min, float max, float scaledMin, float scaledMax)
     {
         float result = (scaledMax - scaledMin) * (number - min) / (max - min) + scaledMin;
         return result;
@@ -53,33 +53,33 @@ public class VoronoiGeneration : MonoBehaviour
         for (int i = 0; i < randomPoints; i++)
         {
             //polygon.Add(new Vertex(seededRandom.Next(0, xsize), seededRandom.Next(0, ysize)));
-            polygon.Add(new Vertex(Random.Range(0.0f, xsize), Random.Range(0.0f, ysize))); 
+            polygon.Add(new Vertex(Random.Range(0.0f, xsize), Random.Range(0.0f, ysize)));
         }
         TriangleNet.Meshing.ConstraintOptions options =
             new TriangleNet.Meshing.ConstraintOptions() { ConformingDelaunay = true };
         mesh = (TriangleNet.Mesh)polygon.Triangulate(options);
         boundedVoronoi = new TriangleNet.Voronoi.BoundedVoronoi(mesh);
 
-        meshBounds = new Bounds(new Vector3((float)mesh.Bounds.Left- (float)mesh.Bounds.Right , (float)mesh.Bounds.Top - (float)mesh.Bounds.Bottom), new Vector3((float)mesh.Bounds.Width, (float)mesh.Bounds.Height));
+        meshBounds = new Bounds(new Vector3((float)mesh.Bounds.Left - (float)mesh.Bounds.Right, (float)mesh.Bounds.Top - (float)mesh.Bounds.Bottom), new Vector3((float)mesh.Bounds.Width, (float)mesh.Bounds.Height));
         //print(meshBounds.extents);
 
         int min = 0;
         int max = 1024;
         int maxX = 0;
         int maxY = 0;
-        
+
         for (int i = 0; i < mesh.vertices.Count; i++)
         {
             //float sample = Mathf.PerlinNoise((float)mesh.vertices[i].x + xOffSet, (float)mesh.vertices[i].y + yOffSet);
             //print("vertextPosition:" + (float)mesh.vertices[i].x + " " + (float)mesh.vertices[i].y);
 
-            
 
-            int x = Mathf.FloorToInt(normalise((float)mesh.vertices[i].x , min, xsize, min,max));
-            int y = Mathf.FloorToInt(normalise((float)mesh.vertices[i].y , min, ysize, min, max));
+
+            int x = Mathf.FloorToInt(normalise((float)mesh.vertices[i].x, min, xsize, min, max));
+            int y = Mathf.FloorToInt(normalise((float)mesh.vertices[i].y, min, ysize, min, max));
             maxX = Mathf.Max(x, maxX);
             maxY = Mathf.Max(y, maxY);
-            
+
             float sample = circleGradient.GetPixel(x, y).grayscale;
             if (sample > 0)
             {
@@ -90,7 +90,7 @@ public class VoronoiGeneration : MonoBehaviour
             elevations.Add(sample);
         }
         print("Max X: " + maxX + " Max Y: " + maxY);
-        findMountainPeak(mesh.vertices);
+        //findMountainPeak(mesh.vertices);
 
         Renderer textureRenderer = chunkPrefab.GetComponent<Renderer>();
         textureRenderer.sharedMaterial.SetFloat("MinHeight", 0);
@@ -166,7 +166,7 @@ public class VoronoiGeneration : MonoBehaviour
     //    }
     //    return false;
     //}
-    void findMountainPeak(Dictionary<int,Vertex> vertices)
+    void findMountainPeak(Dictionary<int, Vertex> vertices)
     {
         //use this to work out if the vert isn't connected to current island?? 
         //if(vertices[ vertices[0].tri.Triangle.neighbors[0].tri.vertices[0].id].biomeType == BiomeType.water)
@@ -178,20 +178,20 @@ public class VoronoiGeneration : MonoBehaviour
         for (int land = 0; land < vertices.Count; land++)
         {
             float distanceFromCoast = float.MinValue;
-            if(vertices[land].biomeType !=BiomeType.water)
+            if (vertices[land].biomeType != BiomeType.water)
             {
                 //isPointEnclosedInWater(vertices, land);
-                for(int water =0; water<vertices.Count;water++)
+                for (int water = 0; water < vertices.Count; water++)
                 {
-                    if(vertices[water].biomeType == BiomeType.water)
+                    if (vertices[water].biomeType == BiomeType.water)
                     {
-                        if(distanceFromWater(vertices[land],vertices[water])>distanceFromCoast)
+                        if (distanceFromWater(vertices[land], vertices[water]) > distanceFromCoast)
                         {
-                            distanceFromCoast = distanceFromWater(vertices[land], vertices[water]);  
+                            distanceFromCoast = distanceFromWater(vertices[land], vertices[water]);
                         }
                     }
                 }
-                if(distanceFromCoast>furthestFromCoast)
+                if (distanceFromCoast > furthestFromCoast)
                 {
                     furthestFromCoast = distanceFromCoast;
                     vertIndex = land;
@@ -204,7 +204,7 @@ public class VoronoiGeneration : MonoBehaviour
     {
         Vector2 landVert = new Vector2((float)land.x, (float)land.y);
         Vector2 waterVert = new Vector2((float)water.x, (float)water.y);
-        return Vector2.Distance(landVert,waterVert);
+        return Vector2.Distance(landVert, waterVert);
     }
     float defineFlat(float height)
     {
@@ -217,7 +217,7 @@ public class VoronoiGeneration : MonoBehaviour
         rightLimits = meshBounds.size.x * waterBoarderPercentage;
         topLimits = meshBounds.size.y - meshBounds.size.y * waterBoarderPercentage;
         bottomLimits = meshBounds.size.y * waterBoarderPercentage;
-        if(vert.x < leftLimits||vert.x>rightLimits || vert.y <topLimits || vert.y >bottomLimits)
+        if (vert.x < leftLimits || vert.x > rightLimits || vert.y < topLimits || vert.y > bottomLimits)
         {
             return true;
         }
@@ -229,7 +229,7 @@ public class VoronoiGeneration : MonoBehaviour
     //    Vector3 point = new Vector3((float)vert.x, (float)vert.y,0);
     //    //contains doesn't appear to actually be a useful function. either bounds are setup improperly 
     //    //if(!meshBounds.Contains(point))
-        
+
     //    if(!shrunkMesh.Bounds.Contains(vert.x ,vert.y))
     //    {
     //        return 0;
@@ -276,7 +276,7 @@ public class VoronoiGeneration : MonoBehaviour
 
                 // get current triangle 
                 Triangle triangle = triangleEnumerator.Current;
-                
+
                 // triangles need to be wound backwards to be rightways up 
                 Vector3 v0 = GetPoint3D(triangle.vertices[2].id);
                 Vector3 v1 = GetPoint3D(triangle.vertices[1].id);
@@ -310,7 +310,7 @@ public class VoronoiGeneration : MonoBehaviour
                 uvs.Add(new Vector2((float)triangle.vertices[0].x / meshBounds.size.x, (float)triangle.vertices[0].y / meshBounds.size.y));
             }
 
-            
+
 
             UnityEngine.Mesh chunkMesh = new UnityEngine.Mesh();
             chunkMesh.vertices = vertices.ToArray();
@@ -323,7 +323,7 @@ public class VoronoiGeneration : MonoBehaviour
             Dictionary<int, BiomeType> vertBiomes = new Dictionary<int, BiomeType>();
             VertexConnection[] vertCons = findVertConnections(chunkMesh);
             vertBiomes = setVertBiomes(vertCons, chunkMesh);
-            List<int>borderVerts = findBorderVerts(vertCons, vertBiomes, chunkMesh, BiomeType.land, BiomeType.water);
+            List<int> borderVerts = findBorderVerts(vertCons, vertBiomes, chunkMesh, BiomeType.land, BiomeType.water);
             printList(borderVerts);
             //GameObject chunk = Instantiate<GameObject>(chunkPrefab, transform.position, transform.rotation);
             GameObject chunk = Instantiate(chunkPrefab, new Vector3(transform.position.x + xOffSet, transform.position.y, transform.position.z + yOffSet), transform.rotation);
@@ -349,7 +349,7 @@ public class VoronoiGeneration : MonoBehaviour
 
     public Color getVertColour(Vector3 point)
     {
-        if(point.y<=0)
+        if (point.y <= 0)
         {
             return Color.blue;
         }
@@ -364,7 +364,7 @@ public class VoronoiGeneration : MonoBehaviour
         switch (vert.biomeType)
         {
             case BiomeType.ocean:
-                result= Color.blue;
+                result = Color.blue;
                 break;
             case BiomeType.water:
                 result = Color.blue;
@@ -415,7 +415,7 @@ public class VoronoiGeneration : MonoBehaviour
         Dictionary<int, BiomeType> result = new Dictionary<int, BiomeType>();
         for (int i = 0; i < vertCons.Length; i++)
         {
-            if (vertCons[i]!=null)
+            if (vertCons[i] != null)
             {
                 if (vertCons[i].connections != null)
                 {
@@ -436,7 +436,7 @@ public class VoronoiGeneration : MonoBehaviour
             return BiomeType.water;
     }
 
-    bool checkSurroundingVertsBiomes(VertexConnection[] vertCons, Dictionary<int, BiomeType> vertBiomes, int vertIndex, BiomeType targetBiome )
+    bool checkSurroundingVertsBiomes(VertexConnection[] vertCons, Dictionary<int, BiomeType> vertBiomes, int vertIndex, BiomeType targetBiome)
     {
         bool result = true;
         for (int i = 0; i < vertCons[vertIndex].connections.Count; i++)
@@ -466,14 +466,32 @@ public class VoronoiGeneration : MonoBehaviour
                 for (int i = 0; i < vertCons[vertIndex].connections.Count; i++)
                 {
 
-                    if (vertBiomes[vertCons[vertIndex].connections[i]] == targetBiome)
+                    if (vertBiomes[vertIndex] == targetBiome)
                     {
                         biomeOne = true;
+                        if (vertBiomes[vertCons[vertIndex].connections[i]] == secondTargetBiome)
+                        {
+                            biomeTwo = true;
+                        }
                     }
-                    else if (vertBiomes[vertCons[vertIndex].connections[i]] == secondTargetBiome)
+                    else if (vertBiomes[vertIndex] == secondTargetBiome)
                     {
                         biomeTwo = true;
+                        if (vertBiomes[vertCons[vertIndex].connections[i]] == targetBiome)
+                        {
+                            biomeOne = true;
+                        }
                     }
+
+
+                    //if (vertBiomes[vertCons[vertIndex].connections[i]] == targetBiome)
+                    //{
+                    //    biomeOne = true;
+                    //}
+                    //else if (vertBiomes[vertCons[vertIndex].connections[i]] == secondTargetBiome)
+                    //{
+                    //    biomeTwo = true;
+                    //}
 
                     if (biomeOne && biomeTwo)
                     {
@@ -490,13 +508,14 @@ public class VoronoiGeneration : MonoBehaviour
         List<int> borderVerts = new List<int>();
         for (int i = 0; i < mesh.vertices.Length; i++)
         {
-            if(findTransitionVerts(vertCons,vertBiomes, i,targetBiome,secondTargetBiome))
+
+            if (findTransitionVerts(vertCons, vertBiomes, i, targetBiome, secondTargetBiome))
             {
-                print(i);
+                print("inside the loop " + i);
                 borderVerts.Add(i);
             }
         }
-        
+
         return borderVerts;
     }
     // draw lines
