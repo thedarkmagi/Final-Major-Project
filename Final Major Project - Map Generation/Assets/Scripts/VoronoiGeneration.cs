@@ -333,6 +333,7 @@ public class VoronoiGeneration : MonoBehaviour
             //printBiomeDictionary(vertBiomes);
             List<int> borderVerts = findBorderVerts(trisList, vertBiomes, chunkMesh, BiomeType.land, BiomeType.water);
             //printList(borderVerts);
+            findCentreOfIsland(chunkMesh, vertBiomes, borderVerts);
             //GameObject chunk = Instantiate<GameObject>(chunkPrefab, transform.position, transform.rotation);
             GameObject chunk = Instantiate(chunkPrefab, new Vector3(transform.position.x + xOffSet, transform.position.y, transform.position.z + yOffSet), transform.rotation);
             chunk.GetComponent<MeshFilter>().mesh = chunkMesh;
@@ -523,68 +524,53 @@ public class VoronoiGeneration : MonoBehaviour
 
         return result;
     }
-    //function currently never results in true. It's cursed as hell just like everything relating 
-    bool findTransitionVerts(VertexConnection[] vertCons, Dictionary<int, BiomeType> vertBiomes, int vertIndex, BiomeType targetBiome, BiomeType secondTargetBiome)
+    void findCentreOfIsland(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts)
     {
-        bool result = false;
-        bool biomeOne = false;
-        bool biomeTwo = false;
-        if (vertCons[vertIndex] != null)
+        Dictionary<int, float> islandVertDistancesFromBorder = new Dictionary<int, float>();
+        for (int i = 0; i < mesh.vertices.Length; i++)
         {
-            if (vertCons[vertIndex].connections != null)
+            if (vertBiomes[i] == BiomeType.land)
             {
-                for (int i = 0; i < vertCons[vertIndex].connections.Count; i++)
-                {
-
-                    if (vertBiomes[vertIndex] == targetBiome)
-                    {
-                        biomeOne = true;
-                        //print("biomes do actually matching at least once biome 1");
-                        BiomeType temp = vertBiomes[vertCons[vertIndex].connections[i]];
-                        print("tempCheck " + temp + " secondBiome target "+secondTargetBiome);
-                        if (temp == secondTargetBiome)
-                        {
-                            biomeTwo = true;
-                            print("found a match");
-                        }
-                    }
-                    if (vertBiomes[vertIndex] == secondTargetBiome)
-                    {
-                        biomeTwo = true;
-                        //print("biomes do actually matching at least once biome 2");
-                        BiomeType temp = vertBiomes[vertCons[vertIndex].connections[i]];
-                        print("tempCheck " + temp + " FirstBiome target " + targetBiome);
-                        if (temp == targetBiome)
-                        {
-                            biomeOne = true;
-                            print("found a match2");
-                        }
-                    }
-
-
-                    if (vertBiomes[vertCons[vertIndex].connections[i]] == targetBiome)
-                    {
-                        biomeOne = true;
-                    }
-                    if (vertBiomes[vertCons[vertIndex].connections[i]] == secondTargetBiome)
-                    {
-                        biomeTwo = true;
-                    }
-
-                    if (biomeOne && biomeTwo)
-                    {
-                        print("TransitionFound <3");
-                        result = true;
-                        break;
-                    }
-                }
+                islandVertDistancesFromBorder[i] = distanceBetweenBorderVertandAnyOther(mesh, i, borderVerts);
             }
         }
-        if (biomeOne && biomeTwo)
+        int indexOfCentreVertex=0;
+        float distanceOfCurrentCentre=0;
+        foreach (var item in islandVertDistancesFromBorder)
         {
-            print("TransitionFound <3 but somewhere weird");
-            result = true;
+            if (item.Value > distanceOfCurrentCentre)
+            {
+                distanceOfCurrentCentre = item.Value;
+                indexOfCentreVertex = item.Key;
+            }
         }
+        print(mesh.vertices[indexOfCentreVertex]);
+        //mesh.vertices[indexOfCentreVertex] = new Vector3(mesh.vertices[indexOfCentreVertex].x, mesh.vertices[indexOfCentreVertex].y+ 100, mesh.vertices[indexOfCentreVertex].z);
+        //mesh.vertices[indexOfCentreVertex] = Vector3.zero;
+        Vector3[] templist = mesh.vertices;
+        templist[indexOfCentreVertex] = new Vector3(mesh.vertices[indexOfCentreVertex].x, mesh.vertices[indexOfCentreVertex].y + 100, mesh.vertices[indexOfCentreVertex].z);
+        mesh.vertices = templist;
+        print(mesh.vertices[indexOfCentreVertex]);
+        Instantiate(new GameObject(), mesh.vertices[indexOfCentreVertex], Quaternion.identity);
+    }
+    float distanceBetweenBorderVertandAnyOther(Mesh mesh, int vertIndex, List<int> borderVerts)
+    {
+        float result = float.MaxValue;
+        
+        for (int i = 0; i < borderVerts.Count; i++)
+        {
+            if(sqrDistance( mesh.vertices[vertIndex], mesh.vertices[borderVerts[i]])<result)
+            {
+                result = sqrDistance(mesh.vertices[vertIndex], mesh.vertices[borderVerts[i]]);
+            }
+        }
+        return result;
+    }
+
+    float sqrDistance(Vector3 one, Vector3 two)
+    {
+        //float result = 0;
+        float result= ((two.x-one.x) * (two.x - one.x))+ ((two.y - one.y) * (two.y - one.y))+ ((two.z - one.z) * (two.z - one.z));
         return result;
     }
     List<int> findBorderVerts(List<List<int>> triList, Dictionary<int, BiomeType> vertBiomes, Mesh mesh, BiomeType targetBiome, BiomeType secondTargetBiome)
