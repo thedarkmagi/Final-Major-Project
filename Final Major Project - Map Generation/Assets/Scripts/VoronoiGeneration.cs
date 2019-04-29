@@ -26,7 +26,7 @@ public class VoronoiGeneration : MonoBehaviour
     private TriangleNet.Voronoi.BoundedVoronoi boundedVoronoi;
 
     public Texture2D circleGradient;
-
+    public bool enabledElevation;
 
     IEnumerator delayStart()
     {
@@ -284,16 +284,19 @@ public class VoronoiGeneration : MonoBehaviour
             chunkMesh.normals = normals.ToArray();
             chunkMesh.colors = vertColors.ToArray();
 
-            Dictionary<int, BiomeType> vertBiomes = new Dictionary<int, BiomeType>();
+            if (enabledElevation)
+            {
+                Dictionary<int, BiomeType> vertBiomes = new Dictionary<int, BiomeType>();
+                //printBiomeDictionary(vertBiomes);
+                VertexConnection[] vertCons = FindAllOverLappingVert(chunkMesh);
+                //print(vertCons.Length);
+                vertBiomes = setVertBiomes(chunkMesh);
+                //printBiomeDictionary(vertBiomes);
+                List<int> borderVerts = findBorderVerts(trisList, vertBiomes, chunkMesh, BiomeType.land, BiomeType.water);
+                //printList(borderVerts);
 
-            //printBiomeDictionary(vertBiomes);
-            VertexConnection[] vertCons = FindAllOverLappingVert(chunkMesh);
-            //print(vertCons.Length);
-            vertBiomes = setVertBiomes( chunkMesh);
-            //printBiomeDictionary(vertBiomes);
-            List<int> borderVerts = findBorderVerts(trisList, vertBiomes, chunkMesh, BiomeType.land, BiomeType.water);
-            //printList(borderVerts);
-            findCentreOfIsland(chunkMesh, vertBiomes, borderVerts, vertCons);
+                findCentreOfIsland(chunkMesh, vertBiomes, borderVerts, vertCons);
+            }
             //GameObject chunk = Instantiate<GameObject>(chunkPrefab, transform.position, transform.rotation);
             GameObject chunk = Instantiate(chunkPrefab, new Vector3(transform.position.x + xOffSet, transform.position.y, transform.position.z + yOffSet), transform.rotation);
             chunk.GetComponent<MeshFilter>().mesh = chunkMesh;
