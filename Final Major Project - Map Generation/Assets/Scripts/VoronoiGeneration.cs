@@ -40,7 +40,7 @@ public class VoronoiGeneration : MonoBehaviour
             }
         }
         print("finishing");
-        Debug.Break();
+        //Debug.Break();
     }
 
     // Start is called before the first frame update
