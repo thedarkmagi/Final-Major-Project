@@ -27,9 +27,11 @@ public class VoronoiGeneration : MonoBehaviour
 
     public Texture2D circleGradient;
 
-    // Start is called before the first frame update
-    void Start()
+
+    IEnumerator delayStart()
     {
+        print("Starting");
+        yield return new WaitForSeconds(1);
         for (int i = 0; i < chunksPerEdge; i++)
         {
             for (int j = 0; j < chunksPerEdge; j++)
@@ -37,6 +39,14 @@ public class VoronoiGeneration : MonoBehaviour
                 generateMesh(xsize * i, ysize * j);
             }
         }
+        print("finishing");
+        Debug.Break();
+    }
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        StartCoroutine(delayStart());
     }
 
 
