@@ -31,7 +31,7 @@ public class VoronoiGeneration : MonoBehaviour
     IEnumerator delayStart()
     {
         print("Starting");
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(0.5f);
         for (int i = 0; i < chunksPerEdge; i++)
         {
             for (int j = 0; j < chunksPerEdge; j++)
@@ -136,46 +136,8 @@ public class VoronoiGeneration : MonoBehaviour
         }
         return height;
     }
-    // entire function is probably a bust
-    //bool isPointEnclosedInWater(Dictionary<int, Vertex> vertices, int id)
-    //{
-    //    int nPointsAroundWater=0;
-    //    for (int i = 0; i < vertices[id].tri.Triangle.vertices.Length; i++)
-    //    {
-    //        if (vertices[id].tri.Triangle.vertices[i].biomeType == BiomeType.water)
-    //        {
-    //            nPointsAroundWater++;
-    //        }
-    //        else if(vertices[id].tri.Triangle.vertices[i].biomeType != BiomeType.water)
-    //        {
-    //            break;
-    //        }
-    //        else // this seems very dangerous as an approach. although unsure on how else to search through this structure. 
-    //        {
-    //            print("neighbors");
-    //            for (int j = 0; j < vertices[id].tri.Triangle.neighbors.Length; j++)
-    //            {
-    //                print("triangles");
-    //                for (int k = 0; k < vertices[id].tri.Triangle.neighbors[j].Triangle.vertices.Length; k++)
-    //                {
-    //                    if (vertices[id].tri.Triangle.neighbors[j].Triangle.vertices[k].biomeType == BiomeType.water)
-    //                    {
-    //                        nPointsAroundWater++;
-    //                    }
-    //                    else
-    //                    {
-    //                        break;
-    //                    }
-    //                }
-    //            }
-    //        }
-    //    }
-    //    if(nPointsAroundWater>3)
-    //    {
-    //        return true;
-    //    }
-    //    return false;
-    //}
+
+    #region unused stuff that I should delete
     void findMountainPeak(Dictionary<int, Vertex> vertices)
     {
         //use this to work out if the vert isn't connected to current island?? 
@@ -220,6 +182,8 @@ public class VoronoiGeneration : MonoBehaviour
     {
         return 0;
     }
+    #endregion
+
     bool enforceWaterEdge(Vertex vert)
     {
         float leftLimits, rightLimits, topLimits, bottomLimits;
@@ -234,22 +198,7 @@ public class VoronoiGeneration : MonoBehaviour
 
         return false;
     }
-    //float forceIslands(Vertex vert, float height)
-    //{
-    //    Vector3 point = new Vector3((float)vert.x, (float)vert.y,0);
-    //    //contains doesn't appear to actually be a useful function. either bounds are setup improperly 
-    //    //if(!meshBounds.Contains(point))
 
-    //    if(!shrunkMesh.Bounds.Contains(vert.x ,vert.y))
-    //    {
-    //        return 0;
-    //    }
-    //    else
-    //    {
-    //       return defineIsland(height);
-    //    }
-
-    //}
 
     public void MakeMesh(int xOffSet, int yOffSet)
     {
@@ -270,7 +219,7 @@ public class VoronoiGeneration : MonoBehaviour
 
             // triangles
             List<int> triangles = new List<int>();
-            // triangles custom 
+            // triangles custom stored in a way I can search to find which verts are part 
             List<List<int>> trisList = new List<List<int>>();
             //vertex colours
             List<Color> vertColors = new List<Color>();
@@ -336,14 +285,14 @@ public class VoronoiGeneration : MonoBehaviour
             chunkMesh.colors = vertColors.ToArray();
 
             Dictionary<int, BiomeType> vertBiomes = new Dictionary<int, BiomeType>();
-            VertexConnection[] vertCons = findVertConnections(chunkMesh);
+          
             //printBiomeDictionary(vertBiomes);
             //print(vertCons.Length);
             vertBiomes = setVertBiomes( chunkMesh);
             //printBiomeDictionary(vertBiomes);
             List<int> borderVerts = findBorderVerts(trisList, vertBiomes, chunkMesh, BiomeType.land, BiomeType.water);
             //printList(borderVerts);
-            findCentreOfIsland(chunkMesh, vertBiomes, borderVerts);
+            findCentreOfIsland(chunkMesh, vertBiomes, borderVerts, trisList);
             //GameObject chunk = Instantiate<GameObject>(chunkPrefab, transform.position, transform.rotation);
             GameObject chunk = Instantiate(chunkPrefab, new Vector3(transform.position.x + xOffSet, transform.position.y, transform.position.z + yOffSet), transform.rotation);
             chunk.GetComponent<MeshFilter>().mesh = chunkMesh;
@@ -351,6 +300,7 @@ public class VoronoiGeneration : MonoBehaviour
             chunk.transform.parent = transform;
         }
     }
+    #region Custom Print Functions
     public void printList<T>(List<T> list)
     {
         for (int i = 0; i < list.Count; i++)
@@ -365,6 +315,178 @@ public class VoronoiGeneration : MonoBehaviour
             print(item.Value);
         }
     }
+    #endregion
+
+    #region Mesh searching 
+    bool findVertIndexOfAdjenctVerts(Mesh mesh,int vertIndex, List<List<int>> triList, Dictionary<int, BiomeType> vertBiomes, BiomeType targetBiome, BiomeType secondTargetBiome)
+    {
+        List<int> adjecentVertIndexs = new List<int>();
+        for (int i = 0; i < triList.Count; i++)
+        {
+            for (int j = 0; j < triList[i].Count; j++)
+            {
+                if (triList[i].Contains(vertIndex))
+                {
+                    if (triList[i][j] != vertIndex)
+                    {
+                        adjecentVertIndexs.Add(triList[i][j]);
+                    }
+                }
+            }
+        }
+        return findTransitionVerts(adjecentVertIndexs, vertBiomes, vertIndex, targetBiome, secondTargetBiome);
+    }
+    List<int> findVertIndexOfAdjenctVerts(Mesh mesh, int vertIndex, List<List<int>> triList)
+    {
+        List<int> adjecentVertIndexs = new List<int>();
+        for (int i = 0; i < mesh.vertices.Length; i++)
+        {
+            if (mesh.vertices[i] == mesh.vertices[vertIndex])
+            {
+                adjecentVertIndexs.Add(i);
+            }
+        }
+        return adjecentVertIndexs;
+    }
+    Dictionary<int, BiomeType> setVertBiomes(Mesh mesh)
+    {
+        print("we are setting biomes");
+        Dictionary<int, BiomeType> result = new Dictionary<int, BiomeType>();
+        for (int i = 0; i < mesh.vertices.Length; i++)
+        {
+            result[i] = setBiomeType(mesh.vertices[i].y);
+
+        }
+        return result;
+    }
+    BiomeType setBiomeType(float height)
+    {
+        if (height > islandHeight)
+            return BiomeType.land;
+        else
+            return BiomeType.water;
+    }
+
+
+    bool findTransitionVerts(List<int> adjecentVertIndexs, Dictionary<int, BiomeType> vertBiomes, int vertIndex, BiomeType targetBiome, BiomeType secondTargetBiome)
+    {
+        bool result = false;
+        bool biomeOne = false;
+        bool biomeTwo = false;
+
+
+        for (int i = 0; i < adjecentVertIndexs.Count; i++)
+        {
+            if (vertBiomes[vertIndex] == targetBiome)
+            {
+                biomeOne = true;
+                BiomeType temp = vertBiomes[adjecentVertIndexs[i]];
+                //print("tempCheck " + temp + " secondBiome target " + secondTargetBiome);
+                if (temp == secondTargetBiome)
+                {
+                    biomeTwo = true;
+                }
+            }
+            if (vertBiomes[vertIndex] == secondTargetBiome)
+            {
+                biomeTwo = true;
+                BiomeType temp = vertBiomes[adjecentVertIndexs[i]];
+                //print("tempCheck " + temp + " FirstBiome target " + targetBiome);
+                if (temp == targetBiome)
+                {
+                    biomeOne = true;
+                }
+            }
+        
+            if (biomeOne && biomeTwo)
+            {
+                //print("TransitionFound <3");
+                result = true;
+                break;
+            }
+        }
+
+        return result;
+    }
+    void findCentreOfIsland(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, List<List<int>> triList)
+    {
+        Dictionary<int, float> islandVertDistancesFromBorder = new Dictionary<int, float>();
+        for (int i = 0; i < mesh.vertices.Length; i++)
+        {
+            if (vertBiomes[i] == BiomeType.land)
+            {
+                islandVertDistancesFromBorder[i] = distanceBetweenBorderVertandAnyOther(mesh, i, borderVerts);
+            }
+        }
+        int indexOfCentreVertex=0;
+        float distanceOfCurrentCentre=0;
+        foreach (var item in islandVertDistancesFromBorder)
+        {
+            if (item.Value > distanceOfCurrentCentre)
+            {
+                distanceOfCurrentCentre = item.Value;
+                indexOfCentreVertex = item.Key;
+            }
+        }
+        print(mesh.vertices[indexOfCentreVertex]);
+        //mesh.vertices[indexOfCentreVertex] = new Vector3(mesh.vertices[indexOfCentreVertex].x, mesh.vertices[indexOfCentreVertex].y+ 100, mesh.vertices[indexOfCentreVertex].z);
+
+        //Vector3[] templist = mesh.vertices;
+        //templist[indexOfCentreVertex] = new Vector3(mesh.vertices[indexOfCentreVertex].x, mesh.vertices[indexOfCentreVertex].y + 100, mesh.vertices[indexOfCentreVertex].z);
+
+        mesh.vertices = updateVertPositionsFromList(findVertIndexOfAdjenctVerts(mesh, indexOfCentreVertex,triList), mesh);
+        print(mesh.vertices[indexOfCentreVertex]);
+        Instantiate(new GameObject(), mesh.vertices[indexOfCentreVertex], Quaternion.identity);
+    }
+    Vector3[] updateVertPositionsFromList(List<int> vertIndexs, Mesh mesh)
+    {
+        Vector3[] templist = mesh.vertices;
+        for (int i = 0; i < vertIndexs.Count; i++)
+        {
+            templist[vertIndexs[i]] = new Vector3(mesh.vertices[vertIndexs[i]].x, mesh.vertices[vertIndexs[i]].y + 100, mesh.vertices[vertIndexs[i]].z);
+        }
+
+        return templist;
+    }
+
+    float distanceBetweenBorderVertandAnyOther(Mesh mesh, int vertIndex, List<int> borderVerts)
+    {
+        float result = float.MaxValue;
+        
+        for (int i = 0; i < borderVerts.Count; i++)
+        {
+            if(sqrDistance( mesh.vertices[vertIndex], mesh.vertices[borderVerts[i]])<result)
+            {
+                result = sqrDistance(mesh.vertices[vertIndex], mesh.vertices[borderVerts[i]]);
+            }
+        }
+        return result;
+    }
+
+#endregion
+
+    #region helper Functions
+    float sqrDistance(Vector3 one, Vector3 two)
+    {
+        //float result = 0;
+        float result= ((two.x-one.x) * (two.x - one.x))+ ((two.y - one.y) * (two.y - one.y))+ ((two.z - one.z) * (two.z - one.z));
+        return result;
+    }
+    List<int> findBorderVerts(List<List<int>> triList, Dictionary<int, BiomeType> vertBiomes, Mesh mesh, BiomeType targetBiome, BiomeType secondTargetBiome)
+    {
+        List<int> borderVerts = new List<int>();
+        for (int i = 0; i < mesh.vertices.Length; i++)
+        {
+            if (findVertIndexOfAdjenctVerts(mesh,i,triList, vertBiomes, targetBiome, secondTargetBiome))
+            {
+                //print("inside the loop " + i);
+                borderVerts.Add(i);
+            }
+        }
+
+        return borderVerts;
+    }
+
     /* Returns a point's local coordinates. */
     public Vector3 GetPoint3D(int index)
     {
@@ -406,197 +528,8 @@ public class VoronoiGeneration : MonoBehaviour
         }
         return result;
     }
-    public class VertexConnection
-    {
-        public List<int> connections = new List<int>();
-    }
-    //credit this function if it works 
-    VertexConnection[] findVertConnections(Mesh mesh)
-    {
-        Vector3[] vertices = mesh.vertices;
-        
-        VertexConnection[] connections = new VertexConnection[vertices.Length];
 
-        for (int i = 0; i < vertices.Length; i++)
-        {
-            var P1 = vertices[i];
-            var VC1 = connections[i];
-            for (int n = i + 1; n < vertices.Length; n++)
-            {
-                if (P1 == vertices[n])
-                {
-                    var VC2 = connections[n];
-                    if (VC2 == null)
-                        VC2 = connections[n] = new VertexConnection();
-                    if (VC1 == null)
-                        VC1 = connections[i] = new VertexConnection();
-                    VC1.connections.Add(n);
-                    VC2.connections.Add(i);
-                }
-            }
-        }
-        return connections;
-    }
-
-    bool findVertIndexOfAdjenctVerts(Mesh mesh,int vertIndex, List<List<int>> triList, Dictionary<int, BiomeType> vertBiomes, BiomeType targetBiome, BiomeType secondTargetBiome)
-    {
-        List<int> adjecentVertIndexs = new List<int>();
-        for (int i = 0; i < triList.Count; i++)
-        {
-            for (int j = 0; j < triList[i].Count; j++)
-            {
-                if(triList[i].Contains(vertIndex))
-                {
-                    if(triList[i][j]!=vertIndex)
-                    {
-                        adjecentVertIndexs.Add(triList[i][j]);
-                    }
-                }
-            }
-        }
-        return findTransitionVerts(adjecentVertIndexs, vertBiomes, vertIndex, targetBiome, secondTargetBiome);
-    }
-    Dictionary<int, BiomeType> setVertBiomes(Mesh mesh)
-    {
-        print("we are setting biomes");
-        Dictionary<int, BiomeType> result = new Dictionary<int, BiomeType>();
-        for (int i = 0; i < mesh.vertices.Length; i++)
-        {
-            result[i] = setBiomeType(mesh.vertices[i].y);
-
-        }
-        return result;
-    }
-    BiomeType setBiomeType(float height)
-    {
-        if (height > islandHeight)
-            return BiomeType.land;
-        else
-            return BiomeType.water;
-    }
-
-    bool checkSurroundingVertsBiomes(VertexConnection[] vertCons, Dictionary<int, BiomeType> vertBiomes, int vertIndex, BiomeType targetBiome)
-    {
-        bool result = true;
-        for (int i = 0; i < vertCons[vertIndex].connections.Count; i++)
-        {
-            if (vertCons[vertIndex].connections != null)
-            {
-                if (vertBiomes[vertCons[vertIndex].connections[i]] != targetBiome)
-                {
-                    result = false;
-                    break;
-                }
-            }
-
-        }
-        return result;
-    }
-    bool findTransitionVerts(List<int> adjecentVertIndexs, Dictionary<int, BiomeType> vertBiomes, int vertIndex, BiomeType targetBiome, BiomeType secondTargetBiome)
-    {
-        bool result = false;
-        bool biomeOne = false;
-        bool biomeTwo = false;
-
-
-        for (int i = 0; i < adjecentVertIndexs.Count; i++)
-        {
-            if (vertBiomes[vertIndex] == targetBiome)
-            {
-                biomeOne = true;
-                //print("biomes do actually matching at least once biome 1");
-                BiomeType temp = vertBiomes[adjecentVertIndexs[i]];
-                //print("tempCheck " + temp + " secondBiome target " + secondTargetBiome);
-                if (temp == secondTargetBiome)
-                {
-                    biomeTwo = true;
-                }
-            }
-            if (vertBiomes[vertIndex] == secondTargetBiome)
-            {
-                biomeTwo = true;
-                //print("biomes do actually matching at least once biome 2");
-                BiomeType temp = vertBiomes[adjecentVertIndexs[i]];
-                //print("tempCheck " + temp + " FirstBiome target " + targetBiome);
-                if (temp == targetBiome)
-                {
-                    biomeOne = true;
-                }
-            }
-        
-            if (biomeOne && biomeTwo)
-            {
-                //print("TransitionFound <3");
-                result = true;
-                break;
-            }
-        }
-
-        return result;
-    }
-    void findCentreOfIsland(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts)
-    {
-        Dictionary<int, float> islandVertDistancesFromBorder = new Dictionary<int, float>();
-        for (int i = 0; i < mesh.vertices.Length; i++)
-        {
-            if (vertBiomes[i] == BiomeType.land)
-            {
-                islandVertDistancesFromBorder[i] = distanceBetweenBorderVertandAnyOther(mesh, i, borderVerts);
-            }
-        }
-        int indexOfCentreVertex=0;
-        float distanceOfCurrentCentre=0;
-        foreach (var item in islandVertDistancesFromBorder)
-        {
-            if (item.Value > distanceOfCurrentCentre)
-            {
-                distanceOfCurrentCentre = item.Value;
-                indexOfCentreVertex = item.Key;
-            }
-        }
-        print(mesh.vertices[indexOfCentreVertex]);
-        //mesh.vertices[indexOfCentreVertex] = new Vector3(mesh.vertices[indexOfCentreVertex].x, mesh.vertices[indexOfCentreVertex].y+ 100, mesh.vertices[indexOfCentreVertex].z);
-        //mesh.vertices[indexOfCentreVertex] = Vector3.zero;
-        Vector3[] templist = mesh.vertices;
-        templist[indexOfCentreVertex] = new Vector3(mesh.vertices[indexOfCentreVertex].x, mesh.vertices[indexOfCentreVertex].y + 100, mesh.vertices[indexOfCentreVertex].z);
-        mesh.vertices = templist;
-        print(mesh.vertices[indexOfCentreVertex]);
-        Instantiate(new GameObject(), mesh.vertices[indexOfCentreVertex], Quaternion.identity);
-    }
-    float distanceBetweenBorderVertandAnyOther(Mesh mesh, int vertIndex, List<int> borderVerts)
-    {
-        float result = float.MaxValue;
-        
-        for (int i = 0; i < borderVerts.Count; i++)
-        {
-            if(sqrDistance( mesh.vertices[vertIndex], mesh.vertices[borderVerts[i]])<result)
-            {
-                result = sqrDistance(mesh.vertices[vertIndex], mesh.vertices[borderVerts[i]]);
-            }
-        }
-        return result;
-    }
-
-    float sqrDistance(Vector3 one, Vector3 two)
-    {
-        //float result = 0;
-        float result= ((two.x-one.x) * (two.x - one.x))+ ((two.y - one.y) * (two.y - one.y))+ ((two.z - one.z) * (two.z - one.z));
-        return result;
-    }
-    List<int> findBorderVerts(List<List<int>> triList, Dictionary<int, BiomeType> vertBiomes, Mesh mesh, BiomeType targetBiome, BiomeType secondTargetBiome)
-    {
-        List<int> borderVerts = new List<int>();
-        for (int i = 0; i < mesh.vertices.Length; i++)
-        {
-            if (findVertIndexOfAdjenctVerts(mesh,i,triList, vertBiomes, targetBiome, secondTargetBiome))
-            {
-                //print("inside the loop " + i);
-                borderVerts.Add(i);
-            }
-        }
-
-        return borderVerts;
-    }
+    #endregion
     // draw lines
     public void OnDrawGizmos()
     {
