@@ -5,8 +5,8 @@ using UnityEngine.UI;
 
 public class MouseInput : MonoBehaviour
 {
-    public enum MouseState {none,ruler};
-    public MouseState mouseState;
+    public enum MouseState {none,ruler,customLabel};
+    private MouseState mouseState;
 
 
     //Ruler Variables
@@ -15,6 +15,10 @@ public class MouseInput : MonoBehaviour
     private bool firstClickHasHappened;
     private LineRenderer lineRenderer;
     private Text distanceDisplay;
+
+    //CustomLabel variables
+    public GameObject customLabelPrefab;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -33,6 +37,7 @@ public class MouseInput : MonoBehaviour
             case MouseState.none:
                 break;
             case MouseState.ruler:
+                #region ruler state
                 if (Input.GetMouseButtonDown(0))
                 {
                     RaycastHit hit;
@@ -58,12 +63,20 @@ public class MouseInput : MonoBehaviour
                     Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
                     if (Physics.Raycast(ray, out hit, 1000.0f))
                     {
-                        lineRenderer.SetPosition(0, firstClickPos);
                         secondPos = hit.point;
-                        lineRenderer.SetPosition(1, secondPos);
                         distanceDisplay.transform.position = Input.mousePosition;
                         distanceDisplay.text = Vector3.Distance(firstClickPos, secondPos).ToString();
                         print(Vector3.Distance(firstClickPos, secondPos));
+                        if (firstClickPos.y>secondPos.y)
+                        {
+                            secondPos.y = firstClickPos.y;
+                        }
+                        else
+                        {
+                            firstClickPos.y = secondPos.y;
+                        }
+                        lineRenderer.SetPosition(0, firstClickPos);
+                        lineRenderer.SetPosition(1, secondPos);
                     }
                 }
                 if(Input.GetMouseButtonDown(1))
@@ -73,6 +86,31 @@ public class MouseInput : MonoBehaviour
                     distanceDisplay.text = "";
                     firstClickHasHappened = false;
                     setMouseState(MouseState.none);
+                }
+                #endregion
+                break;
+            case MouseState.customLabel:
+                // click position
+                // spawn textbox there 
+                //type label
+                //confirm with button
+                if (Input.GetMouseButtonDown(0))
+                {
+                    RaycastHit hit;
+                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+                    if (Physics.Raycast(ray, out hit, 1000.0f))
+                    {
+                        print("first click point " + hit.point);
+                        if (!firstClickHasHappened)
+                        {
+                            firstClickPos = hit.point;
+                            GameObject CustomLabel = Instantiate(customLabelPrefab, new Vector3( hit.point.x, hit.point.y+10, hit.point.z), Quaternion.identity);
+                            CustomLabel.GetComponent<Canvas>().worldCamera = Camera.main;
+                            CustomLabel.transform.LookAt(-Camera.main.transform.position);
+                            setMouseState(MouseState.none);
+                        }
+                    }
                 }
                 break;
             default:
@@ -84,6 +122,10 @@ public class MouseInput : MonoBehaviour
     public void setMouseToRuler()
     {
         setMouseState(MouseState.ruler);
+    }
+    public void setMouseToCustomLabel()
+    {
+        setMouseState(MouseState.customLabel);
     }
 
     public void setMouseState(MouseState state)
