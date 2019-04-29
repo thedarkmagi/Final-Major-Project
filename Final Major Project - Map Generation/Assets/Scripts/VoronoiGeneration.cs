@@ -285,14 +285,15 @@ public class VoronoiGeneration : MonoBehaviour
             chunkMesh.colors = vertColors.ToArray();
 
             Dictionary<int, BiomeType> vertBiomes = new Dictionary<int, BiomeType>();
-          
+
             //printBiomeDictionary(vertBiomes);
+            VertexConnection[] vertCons = FindAllOverLappingVert(chunkMesh);
             //print(vertCons.Length);
             vertBiomes = setVertBiomes( chunkMesh);
             //printBiomeDictionary(vertBiomes);
             List<int> borderVerts = findBorderVerts(trisList, vertBiomes, chunkMesh, BiomeType.land, BiomeType.water);
             //printList(borderVerts);
-            findCentreOfIsland(chunkMesh, vertBiomes, borderVerts, trisList);
+            findCentreOfIsland(chunkMesh, vertBiomes, borderVerts, vertCons);
             //GameObject chunk = Instantiate<GameObject>(chunkPrefab, transform.position, transform.rotation);
             GameObject chunk = Instantiate(chunkPrefab, new Vector3(transform.position.x + xOffSet, transform.position.y, transform.position.z + yOffSet), transform.rotation);
             chunk.GetComponent<MeshFilter>().mesh = chunkMesh;
@@ -336,7 +337,7 @@ public class VoronoiGeneration : MonoBehaviour
         }
         return findTransitionVerts(adjecentVertIndexs, vertBiomes, vertIndex, targetBiome, secondTargetBiome);
     }
-    List<int> findVertIndexOfAdjenctVerts(Mesh mesh, int vertIndex, List<List<int>> triList)
+    List<int> findVertIndexOfAdjenctVerts(Mesh mesh, int vertIndex)
     {
         List<int> adjecentVertIndexs = new List<int>();
         for (int i = 0; i < mesh.vertices.Length; i++)
@@ -350,7 +351,6 @@ public class VoronoiGeneration : MonoBehaviour
     }
     Dictionary<int, BiomeType> setVertBiomes(Mesh mesh)
     {
-        print("we are setting biomes");
         Dictionary<int, BiomeType> result = new Dictionary<int, BiomeType>();
         for (int i = 0; i < mesh.vertices.Length; i++)
         {
@@ -408,7 +408,8 @@ public class VoronoiGeneration : MonoBehaviour
 
         return result;
     }
-    void findCentreOfIsland(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, List<List<int>> triList)
+
+    void findCentreOfIsland(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, VertexConnection[] vertCons)
     {
         Dictionary<int, float> islandVertDistancesFromBorder = new Dictionary<int, float>();
         for (int i = 0; i < mesh.vertices.Length; i++)
@@ -428,22 +429,16 @@ public class VoronoiGeneration : MonoBehaviour
                 indexOfCentreVertex = item.Key;
             }
         }
-        print(mesh.vertices[indexOfCentreVertex]);
-        //mesh.vertices[indexOfCentreVertex] = new Vector3(mesh.vertices[indexOfCentreVertex].x, mesh.vertices[indexOfCentreVertex].y+ 100, mesh.vertices[indexOfCentreVertex].z);
-
-        //Vector3[] templist = mesh.vertices;
-        //templist[indexOfCentreVertex] = new Vector3(mesh.vertices[indexOfCentreVertex].x, mesh.vertices[indexOfCentreVertex].y + 100, mesh.vertices[indexOfCentreVertex].z);
-
-        mesh.vertices = updateVertPositionsFromList(findVertIndexOfAdjenctVerts(mesh, indexOfCentreVertex,triList), mesh);
-        print(mesh.vertices[indexOfCentreVertex]);
+        mesh.vertices = updateVertPositionsFromList(findVertsOfTheSamePosition(vertCons, indexOfCentreVertex), mesh, 0,100,0);
         Instantiate(new GameObject(), mesh.vertices[indexOfCentreVertex], Quaternion.identity);
     }
-    Vector3[] updateVertPositionsFromList(List<int> vertIndexs, Mesh mesh)
+
+    Vector3[] updateVertPositionsFromList(List<int> vertIndexs, Mesh mesh, int xMod=0, int yMod=0, int zMod =0)
     {
         Vector3[] templist = mesh.vertices;
         for (int i = 0; i < vertIndexs.Count; i++)
         {
-            templist[vertIndexs[i]] = new Vector3(mesh.vertices[vertIndexs[i]].x, mesh.vertices[vertIndexs[i]].y + 100, mesh.vertices[vertIndexs[i]].z);
+            templist[vertIndexs[i]] = new Vector3(mesh.vertices[vertIndexs[i]].x + xMod, mesh.vertices[vertIndexs[i]].y + yMod, mesh.vertices[vertIndexs[i]].z + zMod);
         }
 
         return templist;
@@ -461,6 +456,51 @@ public class VoronoiGeneration : MonoBehaviour
             }
         }
         return result;
+    }
+    #region helper Class from https://answers.unity.com/questions/371115/is-there-an-easy-way-to-find-connected-vertices.html 
+    public class VertexConnection
+    {
+        public List<int> connections = new List<int>();
+    }
+
+    VertexConnection[] FindAllOverLappingVert(Mesh mesh)
+    {
+        Vector3[] vertices = mesh.vertices;
+        VertexConnection[] connections = new VertexConnection[vertices.Length];
+
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            var P1 = vertices[i];
+            var VC1 = connections[i];
+            for (int n = i + 1; n < vertices.Length; n++)
+            {
+                if (P1 == vertices[n])
+                {
+                    var VC2 = connections[n];
+                    if (VC2 == null)
+                        VC2 = connections[n] = new VertexConnection();
+                    if (VC1 == null)
+                        VC1 = connections[i] = new VertexConnection();
+                    VC1.connections.Add(n);
+                    VC2.connections.Add(i);
+                }
+            }
+        }
+        return connections;
+    }
+    #endregion
+    List<int> findVertsOfTheSamePosition(VertexConnection[] vertCons, int vertIndex)
+    {
+        List<int> verts = new List<int>();
+        verts.Add(vertIndex);
+        if (vertCons[vertIndex].connections != null)
+        {
+            for (int i = 0; i < vertCons[vertIndex].connections.Count; i++)
+            {
+                verts.Add(vertCons[vertIndex].connections[i]);
+            }
+        }
+        return verts;
     }
 
 #endregion
