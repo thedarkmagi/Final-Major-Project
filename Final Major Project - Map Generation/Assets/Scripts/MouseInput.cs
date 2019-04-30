@@ -85,7 +85,8 @@ public class MouseInput : MonoBehaviour
                     {
                         secondPos = hit.point;
                         distanceDisplay.transform.position = Input.mousePosition;
-                        distanceDisplay.text = Vector3.Distance(firstClickPos, secondPos).ToString();
+                        int distance =Mathf.FloorToInt( Vector3.Distance(firstClickPos, secondPos));
+                        distanceDisplay.text = distance.ToString()+"miles";
                         print(Vector3.Distance(firstClickPos, secondPos));
                         if (firstClickPos.y>secondPos.y)
                         {
