@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class TokenController : MonoBehaviour
 {
-    public GameObject uiButtons;
+    public List<GameObject> uiButtons;
     public MouseInput mouseInputReference;
     // Start is called before the first frame update
     void Start()
     {
-        uiButtons.SetActive(false);
+        setButtionsState(false);
     }
 
     // Update is called once per frame
@@ -20,16 +20,27 @@ public class TokenController : MonoBehaviour
 
     public void ActiveButtons()
     {
-        uiButtons.SetActive(true);
+        setButtionsState(true);
     }
     public void DeactiveButtons()
     {
-        uiButtons.SetActive(false);
+        setButtionsState(false);
+    }
+    private void setButtionsState(bool state)
+    {
+        for (int i = 0; i < uiButtons.Count; i++)
+        {
+            uiButtons[i].SetActive(state);
+        }
     }
     public void setMouseInputStateMoveToken()
     {
         mouseInputReference.setMouseState(MouseInput.MouseState.moveMVP);
         mouseInputReference.setSelectedToken(gameObject);
         DeactiveButtons();
+    }
+    public void killToken()
+    {
+        Destroy(gameObject);
     }
 }

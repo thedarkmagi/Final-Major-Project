@@ -51,7 +51,6 @@ public class MouseInput : MonoBehaviour
                         {
                             print("Ham");
                             hit.collider.gameObject.GetComponent<TokenController>().ActiveButtons();
-                            setMouseState(MouseState.moveMVP);
                         }
                     }
                 }
