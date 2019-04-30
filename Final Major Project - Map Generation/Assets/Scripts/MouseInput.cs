@@ -18,7 +18,7 @@ public class MouseInput : MonoBehaviour
 
     //CustomLabel variables
     public GameObject customLabelPrefab;
-
+    public GameObject aimTarget;
     // Start is called before the first frame update
     void Start()
     {
@@ -105,9 +105,11 @@ public class MouseInput : MonoBehaviour
                         if (!firstClickHasHappened)
                         {
                             firstClickPos = hit.point;
-                            GameObject CustomLabel = Instantiate(customLabelPrefab, new Vector3( hit.point.x, hit.point.y+10, hit.point.z), Quaternion.identity);
-                            CustomLabel.GetComponent<Canvas>().worldCamera = Camera.main;
-                            CustomLabel.transform.LookAt(-Camera.main.transform.position);
+                            GameObject CustomLabel = Instantiate(customLabelPrefab, new Vector3( hit.point.x, hit.point.y+20, hit.point.z), Quaternion.identity);
+                            CustomLabel.GetComponentInChildren<Canvas>().worldCamera = Camera.main;
+                            //CustomLabel.transform.LookAt(CustomLabel.transform.position-transform.position);
+                            CustomLabel.transform.rotation = Quaternion.Euler(-90,-180,0);
+                            //CustomLabel.transform.LookAt(transform);
                             setMouseState(MouseState.none);
                         }
                     }
