@@ -22,6 +22,12 @@ public class MouseInput : MonoBehaviour
     //MVP token variables 
     public GameObject token;
     private GameObject selectedToken;
+
+    //radial variables
+    private List<GameObject> buttonList = new List<GameObject>();
+    public GameObject buttonPrefab;
+    private bool open;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -51,6 +57,7 @@ public class MouseInput : MonoBehaviour
                         {
                             print("Ham");
                             hit.collider.gameObject.GetComponent<TokenController>().ActiveButtons();
+                            spawnButtons(hit);
                         }
                     }
                 }
@@ -192,7 +199,7 @@ public class MouseInput : MonoBehaviour
         }
         
     }
-
+    #region mouse state functions for buttons
     public void setSelectedToken(GameObject token)
     {
         selectedToken = token;
@@ -218,5 +225,141 @@ public class MouseInput : MonoBehaviour
     public void setMouseState(MouseState state)
     {
         mouseState = state;
+    }
+    #endregion
+
+
+
+    public void spawnButtons(RaycastHit hit)
+    {
+        //hit.collider.gameObject.;
+        //print(hit.point);
+        //if (hit.collider.gameObject.GetComponent<PlotType>())
+        //{
+        //    if (hit.collider.gameObject.GetComponent<PlotType>().plotType == PlotType.type.available)
+        //    {
+        // print("ham");
+
+        Canvas canvas = hit.collider.GetComponentInChildren<Canvas>();
+        float distance = 50;
+        open = true;
+        //waitAFrame = true;
+        //var foo = System.Enum.GetValues(typeof(PlotType.type)).Cast<PlotType.type>().Max();
+        //var enumLength = System.Enum.GetNames(typeof(PlotType.type)).Length;
+        var enumLength = 4;
+        //print(foo);
+        for (int i = 1; i < enumLength; i++)
+        {
+
+            float angle = (2 * Mathf.PI / (enumLength - 1)) * i - 1;
+            float xPos = Mathf.Sin(angle);
+            float yPos = Mathf.Cos(angle);
+            //make the thing
+            GameObject newButton = Instantiate(buttonPrefab, new Vector3(hit.point.x, hit.point.y + 20, hit.point.z), Quaternion.identity) as GameObject;
+            newButton.transform.rotation = Quaternion.Euler(-90, 0, 0);
+            newButton.transform.SetParent(canvas.transform);
+            //newButton.transform.position = Input.mousePosition;
+            newButton.transform.localPosition = new Vector3((xPos * distance), (yPos * distance));
+
+            //TEMP DISABLE FOR EASIER DEBUG
+            //newButton.GetComponent<Image>().sprite = BuildingInfo[i - 1].GetComponent<Building>().icon;
+
+
+            //newButton.GetComponent<TestClick>().inputSetting = i;
+            //newButton.GetComponent<TestClick>().owner(gameObject);
+
+            buttonList.Add(newButton);
+
+         }
+        //create text box for hover text to be displayed with.
+        //GameObject newText = Instantiate(TextBox, canvas.transform);
+        //newText.GetComponent<Text>().text = "";
+        //newText.transform.localPosition = new Vector3(Input.mousePosition.x - (Screen.width / 2), Input.mousePosition.y - (Screen.height / 2));
+        ////float angle2 = (2 * Mathf.PI / (enumLength - 1)) *  0;
+        ////float xPos2 = Mathf.Sin(angle2);
+        ////float yPos2 = Mathf.Cos(angle2);
+        ////newText.transform.localPosition = new Vector3((xPos2 * 1) + Input.mousePosition.x - (Screen.width / 2), (yPos2 * 1) + Input.mousePosition.y - (Screen.height / 2));
+        //buttonList.Add(newText);
+
+
+        //// THIS WAS MY JACK ATTEMPT  IT'll probably need to be here
+        //float xDistance = 0;
+        //float xPosition = 0;
+        //float yDistance = 0;
+        //float yPosition = 0;
+        //float canvasWidth = canvas.GetComponent<RectTransform>().rect.width;
+        //float canvasHeight = canvas.GetComponent<RectTransform>().rect.height;
+
+        //// get the furthest out button
+        //foreach (GameObject button in buttonList)
+        //{
+        //    if (Mathf.Abs(xPosition) < Mathf.Abs(button.GetComponent<RectTransform>().localPosition.x))
+        //    {
+        //        xPosition = button.GetComponent<RectTransform>().localPosition.x;
+        //    }
+
+        //    if (Mathf.Abs(yPosition) < Mathf.Abs(button.GetComponent<RectTransform>().localPosition.y))
+        //    {
+        //        yPosition = button.GetComponent<RectTransform>().localPosition.y;
+        //    }
+        //}
+        ////if the button is positive on the x, move the piece left
+        //if (xPosition > 0)
+        //{
+        //    xDistance = (canvas.GetComponent<RectTransform>().rect.width / 2) - (xPosition + (buttonPrefab.GetComponent<RectTransform>().rect.width / 2));
+        //}
+        ////if the button is negative on the x, move the piece right
+        //else
+        //{
+        //    xDistance = Mathf.Abs((canvas.GetComponent<RectTransform>().rect.width / 2) - Mathf.Abs((xPosition - (buttonPrefab.GetComponent<RectTransform>().rect.width / 2))));
+        //}
+
+        ////if the button is positive on the y, move the piece down
+        //if (yPosition > 0)
+        //{
+        //    yDistance = (canvas.GetComponent<RectTransform>().rect.height / 2) - (yPosition + (buttonPrefab.GetComponent<RectTransform>().rect.height / 2));
+        //}
+        ////if the button is negative on the y, move the piece up
+        //else
+        //{
+        //    yDistance = Mathf.Abs((canvas.GetComponent<RectTransform>().rect.height / 2) - Mathf.Abs((yPosition - (buttonPrefab.GetComponent<RectTransform>().rect.height / 2))));
+        //}
+
+        ////move all the buttons into position
+        //foreach (GameObject button in buttonList)
+        // {
+        //     button.GetComponent<RectTransform>().localPosition += new Vector3(xDistance, yDistance);
+        // }
+
+         //bool insideScreen = false;
+         //GameObject furthestAway;
+         //foreach(GameObject button in buttonList)
+         //{
+         //    Mathf.Abs( button.transform.localPosition.x  )
+         //}
+            //}
+
+        //}
+
+    }
+
+    public int ClearButtons()
+    {
+        int result = 0;
+        open = false;
+        //selection = events.GetComponent<UnityEngine.EventSystems.EventSystem>().currentSelectedGameObject.gameObject;
+        // do selection code somewhere here
+        for (int i = 0; i < buttonList.Count; i++)
+        {
+            //if (buttonList[i] == selection)
+            //{
+            //    result = i;
+            //}
+            Destroy(buttonList[i]);
+        }
+        buttonList.Clear();
+        //Time.timeScale = 1;
+
+        return result;
     }
 }
