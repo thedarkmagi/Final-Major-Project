@@ -31,7 +31,7 @@ public class VoronoiGeneration : MonoBehaviour
     IEnumerator delayStart()
     {
         print("Starting");
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0);
         for (int i = 0; i < chunksPerEdge; i++)
         {
             for (int j = 0; j < chunksPerEdge; j++)
