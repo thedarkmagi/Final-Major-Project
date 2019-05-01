@@ -57,7 +57,7 @@ public class MouseInput : MonoBehaviour
                         {
                             print("Ham");
                             hit.collider.gameObject.GetComponent<TokenController>().ActiveButtons();
-                            spawnButtons(hit);
+                            //spawnButtons(hit);
                         }
                     }
                 }
@@ -205,6 +205,7 @@ public class MouseInput : MonoBehaviour
         selectedToken = token;
     }
 
+
     public void setMouseToRuler()
     {
         setMouseState(MouseState.ruler);
@@ -229,7 +230,7 @@ public class MouseInput : MonoBehaviour
     #endregion
 
 
-
+#region Radial button code unsure if I want to use it
     public void spawnButtons(RaycastHit hit)
     {
         //hit.collider.gameObject.;
@@ -362,4 +363,6 @@ public class MouseInput : MonoBehaviour
 
         return result;
     }
+
+    #endregion
 }
