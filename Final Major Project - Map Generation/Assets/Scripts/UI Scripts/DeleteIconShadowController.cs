@@ -18,18 +18,15 @@ public class DeleteIconShadowController : MonoBehaviour, IPointerEnterHandler, I
     {
         //do your stuff when highlighted
         deleteShadow.sprite = openIcon;
-        print("we hovering");
     }
     public void OnPointerExit(PointerEventData eventData)
     {
         //do your stuff when highlighted
         deleteShadow.sprite = closedIcon;
-        print("we Leaving the hovering");
     }
     public void OnSelect(BaseEventData eventData)
     {
         //do your stuff when selected
         deleteShadow.sprite = closedIcon;
-        print("we selecting :3");
     }
 }

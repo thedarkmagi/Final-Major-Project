@@ -17,6 +17,7 @@ public class InputFieldController : MonoBehaviour
         buttonImage = GetComponent<Image>();
         buttonText = GetComponentInChildren<Text>();
         inputField = GetComponentInChildren<TMP_InputField>();
+        inputField.interactable = true;
         shadow = GetComponentInChildren<InputFieldVisualOnly>();
     }
     public void setReadOnly()

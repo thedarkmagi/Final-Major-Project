@@ -55,7 +55,6 @@ public class MouseInput : MonoBehaviour
                     {
                         if(hit.collider.gameObject.tag == "MVPToken")
                         {
-                            print("Ham");
                             hit.collider.gameObject.GetComponent<TokenController>().ActiveButtons();
                             //spawnButtons(hit);
                         }

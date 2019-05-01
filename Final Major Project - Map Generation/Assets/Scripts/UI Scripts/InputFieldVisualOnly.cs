@@ -18,16 +18,7 @@ public class InputFieldVisualOnly : MonoBehaviour
     }
     public void setReadOnly()
     {
-        if (inputField.interactable)
-        {
-            buttonImage.sprite = editIcon;
-            deleteButton.SetActive(false);
-        }
-        else
-        {
-            buttonImage.sprite = doneIcon;
-            deleteButton.SetActive(true);
-        }
+
     }
 
     public void setReadOnly(bool input)
