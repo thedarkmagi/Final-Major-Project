@@ -5,27 +5,29 @@ using TMPro;
 using UnityEngine.UI;
 public class InputFieldController : MonoBehaviour
 {
-    private TMP_InputField inputField;
-    private Text buttonText;
+    public TMP_InputField inputField;
+
     public GameObject deleteButton;
     private Image buttonImage;
     public Sprite editIcon, doneIcon;
     private InputFieldVisualOnly shadow;
     private void Start()
     {
-        deleteButton.SetActive(false);
+        //deleteButton.SetActive(false);
+        
         buttonImage = GetComponent<Image>();
-        buttonText = GetComponentInChildren<Text>();
-        inputField = GetComponentInChildren<TMP_InputField>();
+
+        //inputField = GetComponentInChildren<TMP_InputField>();
         inputField.interactable = true;
         shadow = GetComponentInChildren<InputFieldVisualOnly>();
+        deleteButton.SetActive(true);
+
     }
     public void setReadOnly()
     {
         if (inputField.interactable)
         {
             inputField.interactable = false;
-            //buttonText.text = "Edit";
             buttonImage.sprite = editIcon;
             deleteButton.SetActive(false);
             shadow.setReadOnly(true);
@@ -33,7 +35,6 @@ public class InputFieldController : MonoBehaviour
         else
         {
             inputField.interactable = true;
-            //buttonText.text = "Done";
             buttonImage.sprite = doneIcon;
             deleteButton.SetActive(true);
             shadow.setReadOnly(false);
