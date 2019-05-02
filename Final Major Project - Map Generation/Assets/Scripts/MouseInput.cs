@@ -136,7 +136,8 @@ public class MouseInput : MonoBehaviour
                             firstClickPos = hit.point;
                             GameObject CustomLabel = Instantiate(customLabelPrefab, new Vector3( hit.point.x, hit.point.y+20, hit.point.z), Quaternion.identity);
                             CustomLabel.GetComponentInChildren<Canvas>().worldCamera = Camera.main;
-                            allButtons.Add(CustomLabel.GetComponent<ScaleIcon>());
+                            allButtons.Add(CustomLabel.GetComponentInChildren<ScaleIcon>());
+                            //allButtons.Add(CustomLabel.GetComponent<ScaleIcon>());
                             //CustomLabel.transform.LookAt(CustomLabel.transform.position-transform.position);
                             CustomLabel.transform.rotation = Quaternion.Euler(-90,-180,0);
                             //CustomLabel.transform.LookAt(transform);

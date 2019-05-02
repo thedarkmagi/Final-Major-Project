@@ -4,12 +4,13 @@ using UnityEngine;
 
 public class ScaleIcon : MonoBehaviour
 {
-    private Transform defaultTransfom;
+    private Vector3 defaultTransfom;
     private Vector3 defaultScale;
+    public bool scaleAndMove;
     // Start is called before the first frame update
     void Start()
     {
-        defaultTransfom = transform;
+        defaultTransfom = transform.localPosition;
         defaultScale = transform.localScale;
     }
 
@@ -21,8 +22,10 @@ public class ScaleIcon : MonoBehaviour
 
     public void updateScale(float scaleModifier)
     {
-        print(transform.localScale + "before Mod");
         transform.localScale = defaultScale * scaleModifier;
-        print(transform.localScale);
+        if(scaleAndMove)
+        {
+            transform.localPosition = new Vector3(defaultTransfom.x, defaultTransfom.y * scaleModifier, defaultTransfom.z);
+        }
     }
 }
