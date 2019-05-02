@@ -6,6 +6,11 @@ public class DeleteObject : MonoBehaviour
 {
     public void deleteObject()
     {
+        if(GetComponent<ScaleIcon>())
+        {
+            FindObjectOfType<MouseInput>().deleteFromScaleableList(GetComponent<ScaleIcon>());
+        }
+
         Destroy(gameObject);
     }
 }

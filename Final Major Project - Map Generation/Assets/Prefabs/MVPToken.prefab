@@ -1007,6 +1007,7 @@ GameObject:
   - component: {fileID: 7796028458293497770}
   - component: {fileID: 7796028458293497769}
   - component: {fileID: 9155110781863374022}
+  - component: {fileID: 2859540850963969640}
   m_Layer: 0
   m_Name: MVPToken
   m_TagString: MVPToken
@@ -1144,6 +1145,18 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 6a78baed2b945c44287ea8c747cbfdea, type: 3}
   - {fileID: 21300000, guid: 50dad2e6862a6d04ba911f1abac52a2c, type: 3}
   - {fileID: 21300000, guid: 4c8fabc336a112647949c78d6ebd7b98, type: 3}
+--- !u!114 &2859540850963969640
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7796028458293497768}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0537888ac4efc6f4786dc5a30bd6e8c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7859267234293279228
 GameObject:
   m_ObjectHideFlags: 0

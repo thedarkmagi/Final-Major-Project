@@ -9,6 +9,8 @@ public class MouseInput : MonoBehaviour
     private MouseState mouseState;
 
 
+    public List<ScaleIcon> allButtons = new List<ScaleIcon>();
+
     //Ruler Variables
     private Vector3 firstClickPos;
     private Vector3 secondPos;
@@ -134,6 +136,7 @@ public class MouseInput : MonoBehaviour
                             firstClickPos = hit.point;
                             GameObject CustomLabel = Instantiate(customLabelPrefab, new Vector3( hit.point.x, hit.point.y+20, hit.point.z), Quaternion.identity);
                             CustomLabel.GetComponentInChildren<Canvas>().worldCamera = Camera.main;
+                            allButtons.Add(CustomLabel.GetComponent<ScaleIcon>());
                             //CustomLabel.transform.LookAt(CustomLabel.transform.position-transform.position);
                             CustomLabel.transform.rotation = Quaternion.Euler(-90,-180,0);
                             //CustomLabel.transform.LookAt(transform);
@@ -160,6 +163,7 @@ public class MouseInput : MonoBehaviour
                             GameObject tokenLocal = Instantiate(token, new Vector3(hit.point.x, hit.point.y + 20, hit.point.z), Quaternion.identity);
                             tokenLocal.GetComponentInChildren<Canvas>().worldCamera = Camera.main;
                             tokenLocal.GetComponent<TokenController>().mouseInputReference = this;
+                            allButtons.Add(tokenLocal.GetComponent<ScaleIcon>());
                             //CustomLabel.transform.LookAt(CustomLabel.transform.position-transform.position);
                             tokenLocal.transform.rotation = Quaternion.Euler(90, 0, 0);
                             //CustomLabel.transform.LookAt(transform);
@@ -227,7 +231,13 @@ public class MouseInput : MonoBehaviour
         mouseState = state;
     }
     #endregion
-
+    public void deleteFromScaleableList(ScaleIcon icon)
+    {
+        if(allButtons.Contains(icon))
+        {
+            allButtons.Remove(icon);
+        }
+    }
 
 #region Radial button code unsure if I want to use it
     public void spawnButtons(RaycastHit hit)

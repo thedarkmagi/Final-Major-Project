@@ -5,6 +5,7 @@ using UnityEngine;
 public class CameraController : MonoBehaviour
 {
     private Camera camera;
+    private MouseInput mouseInput;
     public float FOVMin,FOVMax;
     public float FOVChangeAmount;
 
@@ -15,6 +16,7 @@ public class CameraController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        mouseInput = GetComponent<MouseInput>();
         camera = GetComponent<Camera>();
         screenWidth = Screen.width;
         screenHeight = Screen.height;
@@ -29,7 +31,6 @@ public class CameraController : MonoBehaviour
 
         if (Input.mouseScrollDelta.y > 0)
         {
-            print("Y>0");
             FOVChange(-FOVChangeAmount);
         }
         if (Input.mouseScrollDelta.y < 0)
@@ -57,7 +58,10 @@ public class CameraController : MonoBehaviour
         }
 
         gameObject.transform.position += modifyPosition;
-
+        if(Input.mouseScrollDelta != Vector2.zero)
+        {
+            updateScales();
+        }
     }
 
     void FOVChange(float modifier)
@@ -65,6 +69,21 @@ public class CameraController : MonoBehaviour
         if (camera.fieldOfView + modifier <= FOVMax && camera.fieldOfView + modifier >= FOVMin)
         {
             camera.fieldOfView += modifier;
+        }
+    }
+
+    float normalise(float number, float scaledMin=0.1f, float scaledMax =2)
+    {
+        float result = (scaledMax - scaledMin) * (number - FOVMin) / (FOVMax - FOVMin) + scaledMin;
+        return result;
+    }
+
+    void updateScales()
+    {
+        float scaleMod = normalise(camera.fieldOfView);
+        for (int i = 0; i < mouseInput.allButtons.Count; i++)
+        {
+            mouseInput.allButtons[i].updateScale(scaleMod);
         }
     }
 }
