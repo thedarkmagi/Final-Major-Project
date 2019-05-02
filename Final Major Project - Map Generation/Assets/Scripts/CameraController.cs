@@ -8,10 +8,16 @@ public class CameraController : MonoBehaviour
     public float FOVMin,FOVMax;
     public float FOVChangeAmount;
 
+    private int screenWidth, screenHeight;
+    public int boundary;
+    public float speed;
+    private Vector3 modifyPosition;
     // Start is called before the first frame update
     void Start()
     {
         camera = GetComponent<Camera>();
+        screenWidth = Screen.width;
+        screenHeight = Screen.height;
     }
 
     //+z is up +x is right 
@@ -31,6 +37,26 @@ public class CameraController : MonoBehaviour
             FOVChange(FOVChangeAmount);
         }
 
+        modifyPosition = Vector3.zero;
+        if (Input.mousePosition.x > screenWidth - boundary)
+        {
+            modifyPosition.x = speed * Time.deltaTime;
+        }
+        else if (Input.mousePosition.x < boundary)
+        {
+            modifyPosition.x = -(speed * Time.deltaTime);
+        }
+
+        if (Input.mousePosition.y > screenHeight - boundary)
+        {
+            modifyPosition.z = speed * Time.deltaTime;
+        }
+        else if (Input.mousePosition.y < boundary)
+        {
+            modifyPosition.z = -(speed * Time.deltaTime);
+        }
+
+        gameObject.transform.position += modifyPosition;
 
     }
 
