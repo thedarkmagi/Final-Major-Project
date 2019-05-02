@@ -27,6 +27,7 @@ public class VoronoiGeneration : MonoBehaviour
 
     public Texture2D circleGradient;
     public List<Texture2D> genMaps;
+    public bool useImagePool;
     public bool enabledElevation;
 
     public bool usePerlinNoise;
@@ -78,12 +79,23 @@ public class VoronoiGeneration : MonoBehaviour
         int randomMap = Random.Range(0, genMaps.Count);
 
         int min = 0;
-        int maxW = genMaps[randomMap].width;
-        int maxH = genMaps[randomMap].height;
-        circleGradient = genMaps[randomMap];
+        int maxW; 
+        int maxH; 
         int max = 1024;
         int maxX = 0;
         int maxY = 0;
+        if (useImagePool)
+        {
+            circleGradient = genMaps[randomMap];
+            maxW = genMaps[randomMap].width;
+            maxH = genMaps[randomMap].height;
+        }
+        else
+        {
+            maxW = circleGradient.width;
+            maxH = circleGradient.height;
+        }
+        
 
         for (int i = 0; i < mesh.vertices.Count; i++)
         {
@@ -313,8 +325,11 @@ public class VoronoiGeneration : MonoBehaviour
             GameObject chunk = Instantiate(chunkPrefab, new Vector3(transform.position.x + xOffSet, transform.position.y, transform.position.z + yOffSet), transform.rotation);
             chunk.GetComponent<MeshFilter>().mesh = chunkMesh;
             chunk.GetComponent<MeshCollider>().sharedMesh = chunkMesh;
+            Camera.main.gameObject.transform.position = new Vector3(chunk.transform.position.x + xsize/2 , Camera.main.transform.position.y, chunk.transform.position.z + ysize/2);
             chunk.transform.parent = transform;
+            
         }
+        
     }
     #region Custom Print Functions
     public void printList<T>(List<T> list)

@@ -373,6 +373,10 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 6a78baed2b945c44287ea8c747cbfdea, type: 3}
   - {fileID: 2800000, guid: 50dad2e6862a6d04ba911f1abac52a2c, type: 3}
   - {fileID: 2800000, guid: 4c8fabc336a112647949c78d6ebd7b98, type: 3}
+  - {fileID: 2800000, guid: c06ffda346a05e74c865a82237292da6, type: 3}
+  - {fileID: 2800000, guid: 3d7010f3fd205154a9ea1abb75d9f09e, type: 3}
+  - {fileID: 2800000, guid: e49c7cb48d936514fba229c0c4fe9abe, type: 3}
+  useImagePool: 1
   enabledElevation: 0
   usePerlinNoise: 0
 --- !u!1 &436114135
