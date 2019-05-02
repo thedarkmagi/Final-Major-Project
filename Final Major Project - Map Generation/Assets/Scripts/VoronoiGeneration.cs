@@ -26,8 +26,10 @@ public class VoronoiGeneration : MonoBehaviour
     private TriangleNet.Voronoi.BoundedVoronoi boundedVoronoi;
 
     public Texture2D circleGradient;
+    public List<Texture2D> genMaps;
     public bool enabledElevation;
 
+    public bool usePerlinNoise;
     IEnumerator delayStart()
     {
         print("Starting");
@@ -73,24 +75,34 @@ public class VoronoiGeneration : MonoBehaviour
         meshBounds = new Bounds(new Vector3((float)mesh.Bounds.Left - (float)mesh.Bounds.Right, (float)mesh.Bounds.Top - (float)mesh.Bounds.Bottom), new Vector3((float)mesh.Bounds.Width, (float)mesh.Bounds.Height));
         //print(meshBounds.extents);
 
+        int randomMap = Random.Range(0, genMaps.Count);
+
         int min = 0;
+        int maxW = genMaps[randomMap].width;
+        int maxH = genMaps[randomMap].height;
+        circleGradient = genMaps[randomMap];
         int max = 1024;
         int maxX = 0;
         int maxY = 0;
 
         for (int i = 0; i < mesh.vertices.Count; i++)
         {
-            //float sample = Mathf.PerlinNoise((float)mesh.vertices[i].x + xOffSet, (float)mesh.vertices[i].y + yOffSet);
-            //print("vertextPosition:" + (float)mesh.vertices[i].x + " " + (float)mesh.vertices[i].y);
+            float sample;
+            if (usePerlinNoise)
+            {
+                sample = Mathf.PerlinNoise((float)mesh.vertices[i].x + xOffSet, (float)mesh.vertices[i].y + yOffSet);
+                //print("vertextPosition:" + (float)mesh.vertices[i].x + " " + (float)mesh.vertices[i].y);
+            }
+            else
+            {
 
+                int x = Mathf.FloorToInt(normalise((float)mesh.vertices[i].x, min, xsize, min, maxW));
+                int y = Mathf.FloorToInt(normalise((float)mesh.vertices[i].y, min, ysize, min, maxH));
+                maxX = Mathf.Max(x, maxX);
+                maxY = Mathf.Max(y, maxY);
 
-
-            int x = Mathf.FloorToInt(normalise((float)mesh.vertices[i].x, min, xsize, min, max));
-            int y = Mathf.FloorToInt(normalise((float)mesh.vertices[i].y, min, ysize, min, max));
-            maxX = Mathf.Max(x, maxX);
-            maxY = Mathf.Max(y, maxY);
-
-            float sample = circleGradient.GetPixel(x, y).grayscale;
+                sample = circleGradient.GetPixel(x, y).grayscale;
+            }
             if (sample > 0)
             {
                 //print("vertex: " + i + " X:" + x + " Y:" + y + " Sampled value: " + sample);
