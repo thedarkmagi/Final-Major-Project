@@ -336,7 +336,7 @@ MonoBehaviour:
   chunksPerEdge: 1
   displayTrianglesGizmos: 0
   displayVoronoiGizmos: 0
-  circleGradient: {fileID: 2800000, guid: e49c7cb48d936514fba229c0c4fe9abe, type: 3}
+  circleGradient: {fileID: 2800000, guid: 30b6aa1e982e6224e8444f4275305aa3, type: 3}
   genMaps:
   - {fileID: 2800000, guid: a807d58712c730c44800a0c67bc94e03, type: 3}
   - {fileID: 2800000, guid: 0be7a40de6a5b1f4fbbc56233c8e12fb, type: 3}
@@ -376,7 +376,8 @@ MonoBehaviour:
   - {fileID: 2800000, guid: c06ffda346a05e74c865a82237292da6, type: 3}
   - {fileID: 2800000, guid: 3d7010f3fd205154a9ea1abb75d9f09e, type: 3}
   - {fileID: 2800000, guid: e49c7cb48d936514fba229c0c4fe9abe, type: 3}
-  useImagePool: 1
+  - {fileID: 2800000, guid: 30b6aa1e982e6224e8444f4275305aa3, type: 3}
+  useImagePool: 0
   enabledElevation: 0
   usePerlinNoise: 0
 --- !u!1 &436114135
