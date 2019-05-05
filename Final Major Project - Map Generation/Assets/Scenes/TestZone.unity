@@ -377,7 +377,7 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 3d7010f3fd205154a9ea1abb75d9f09e, type: 3}
   - {fileID: 2800000, guid: e49c7cb48d936514fba229c0c4fe9abe, type: 3}
   - {fileID: 2800000, guid: 30b6aa1e982e6224e8444f4275305aa3, type: 3}
-  useImagePool: 0
+  useImagePool: 1
   enabledElevation: 0
   usePerlinNoise: 0
 --- !u!1 &436114135
