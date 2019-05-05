@@ -55,14 +55,33 @@ public class MouseInput : MonoBehaviour
 
                     if (Physics.Raycast(ray, out hit, 1000.0f))
                     {
-                        if(hit.collider.gameObject.tag == "MVPToken")
+                        if (hit.collider.gameObject.tag == "MVPToken")
                         {
                             hit.collider.gameObject.GetComponent<TokenController>().ActiveButtons();
                             //spawnButtons(hit);
                         }
+                        if (hit.collider.gameObject.tag == "PinOnly")
+                        {
+                            hit.collider.gameObject.GetComponent<ToggleOnOff>().showLabelOnTimer();
+                            //spawnButtons(hit);
+                        }
                     }
                 }
+                if (true) // this is me cheating. this script needs refactioring for a more efficent raycast checking system. 
+                {
+                    RaycastHit hit;
+                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
+                    if (Physics.Raycast(ray, out hit, 1000.0f))
+                    {
+                        if (hit.collider.gameObject.tag == "PinOnly")
+                        {
+                            hit.collider.gameObject.GetComponent<ToggleOnOff>().showLabelOnTimer();
+                            
+                            //spawnButtons(hit);
+                        }
+                    }
+                }
                 break;
             case MouseState.ruler:
                 #region ruler state
@@ -139,7 +158,7 @@ public class MouseInput : MonoBehaviour
                             allButtons.Add(CustomLabel.GetComponentInChildren<ScaleIcon>());
                             //allButtons.Add(CustomLabel.GetComponent<ScaleIcon>());
                             //CustomLabel.transform.LookAt(CustomLabel.transform.position-transform.position);
-                            CustomLabel.transform.rotation = Quaternion.Euler(-90,-180,0);
+                            CustomLabel.transform.localRotation= Quaternion.Euler(90,0,0);
                             //CustomLabel.transform.LookAt(transform);
                             resetMouseState();
                         }
