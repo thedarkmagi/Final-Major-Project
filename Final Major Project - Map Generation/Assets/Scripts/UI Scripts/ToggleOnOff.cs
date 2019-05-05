@@ -57,8 +57,11 @@ public class ToggleOnOff : MonoBehaviour, IPointerEnterHandler, ISelectHandler, 
         if (!label.activeSelf)
         {
             label.SetActive(true);
-            tag = "Pin";
+            
         }
+        tag = "Pin";
+        deactivated = false;
+        timerActive = false;
     }
 
     void showLabelTemp()

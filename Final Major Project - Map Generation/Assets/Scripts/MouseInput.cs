@@ -62,7 +62,7 @@ public class MouseInput : MonoBehaviour
                         }
                         if (hit.collider.gameObject.tag == "PinOnly")
                         {
-                            hit.collider.gameObject.GetComponent<ToggleOnOff>().showLabelOnTimer();
+                            hit.collider.gameObject.GetComponent<ToggleOnOff>().showLabel();
                             //spawnButtons(hit);
                         }
                     }
