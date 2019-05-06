@@ -54,6 +54,7 @@ public class VoronoiGeneration : MonoBehaviour
         enabledElevation = settings.useElevationSystem;
         chunksPerEdge = settings.nChunks;
         selectedImagePoolIndex = settings.selectedImagePoolIndex;
+        usePerlinNoise = settings.usePerlin;
     }
 
     public void StartGeneration()
@@ -127,8 +128,6 @@ public class VoronoiGeneration : MonoBehaviour
             if (usePerlinNoise)
             {
                 sample = Mathf.PerlinNoise((float)mesh.vertices[i].x + xOffSet, (float)mesh.vertices[i].y + yOffSet);
-                //print("vertextPosition:" + (float)mesh.vertices[i].x + " " + (float)mesh.vertices[i].y);
-                print("we're perlin noising illegally ");
             }
             else
             {

@@ -13,6 +13,7 @@ public class MenuGenerationInterface : MonoBehaviour
         public int selectedImagePoolIndex;
         public bool useImagePool;
         public bool useElevationSystem;
+        public bool usePerlin;
         
     }
     public struct chunkSize
@@ -27,6 +28,8 @@ public class MenuGenerationInterface : MonoBehaviour
 
     public Slider islandThreshHold;
     public Dropdown sizeDropdown;
+    public GameObject imagePoolDropdown;
+    public Toggle perlinToggle;
     #endregion
 
     private GenerationSettings generationSettings;
@@ -40,6 +43,7 @@ public class MenuGenerationInterface : MonoBehaviour
         generationSettings.islandThreshHold = 0.5f;
         generationSettings.useImagePool = true;
         generationSettings.useElevationSystem = false;
+        generationSettings.usePerlin = false;
         generationSettings.nChunks = 1;
         generationSettings.selectedImagePoolIndex = 0;
         selectedSizeIndex = 0;
@@ -61,10 +65,8 @@ public class MenuGenerationInterface : MonoBehaviour
         sizeList.Add(large);
         selectedSizeIndex = 0;
         #endregion
-
+        
     }
-
-
 
 
 
@@ -87,10 +89,28 @@ public class MenuGenerationInterface : MonoBehaviour
     public void setUseImagePool(bool input)
     {
         generationSettings.useImagePool = input;
+        imagePoolDropdown.SetActive(input);
+        if (input)
+        {
+            perlinToggle.isOn = false;
+        }
     }
     public void setUseElevation(bool input)
     {
         generationSettings.useElevationSystem = input;
+    }
+    public void setUsePerlin(bool input)
+    {
+        generationSettings.usePerlin = input;
+        if(generationSettings.useImagePool && input)
+        {
+            //generationSettings.useImagePool = false;
+            imagePoolDropdown.GetComponentInParent<Toggle>().isOn = false;
+        }
+    }
+    public void exit()
+    {
+        Application.Quit();
     }
     public void startGeneration()
     {
