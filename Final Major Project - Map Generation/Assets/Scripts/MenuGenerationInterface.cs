@@ -19,8 +19,14 @@ public class MenuGenerationInterface : MonoBehaviour
     public struct chunkSize
     {
         public int nPointsInputted;
-        public int Xsize, Ysize; 
+        public int Xsize, Ysize;
         // should probably include camera presets for this
+        public int cameraYPos;
+    }
+    public struct cameraSettings
+    {
+        public int yPos;
+        // 248 is what it used to be for the small size. 
     }
 
     #region references 
@@ -51,14 +57,17 @@ public class MenuGenerationInterface : MonoBehaviour
         small.nPointsInputted = 1000;
         small.Xsize = 250;
         small.Ysize = 250;
+        small.cameraYPos = 248;
 
         medium.nPointsInputted = 5000;
         medium.Xsize = 1250;
         medium.Ysize = 1250;
+        medium.cameraYPos = 750;
 
         large.nPointsInputted = 10000;
         large.Xsize = 2500;
         large.Ysize = 2500;
+        large.cameraYPos = 1500;
 
         sizeList.Add(small);
         sizeList.Add(medium);
@@ -121,6 +130,7 @@ public class MenuGenerationInterface : MonoBehaviour
         }
 
         generationSettings.chunkSize = sizeList[selectedSizeIndex];
+        Camera.main.transform.position = new Vector3(Camera.main.transform.position.x, generationSettings.chunkSize.cameraYPos, Camera.main.transform.position.z);
         generator.SetGenerationSettings(generationSettings);
         generator.StartGeneration();
         gameObject.SetActive(false);

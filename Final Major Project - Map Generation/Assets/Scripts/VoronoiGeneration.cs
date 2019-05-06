@@ -347,11 +347,16 @@ public class VoronoiGeneration : MonoBehaviour
                 findCentreOfIsland(chunkMesh, vertBiomes, borderVerts, vertCons);
             }
             //GameObject chunk = Instantiate<GameObject>(chunkPrefab, transform.position, transform.rotation);
+            GameObject rotationParent = new GameObject();
             GameObject chunk = Instantiate(chunkPrefab, new Vector3(transform.position.x + xOffSet, transform.position.y, transform.position.z + yOffSet), transform.rotation);
             chunk.GetComponent<MeshFilter>().mesh = chunkMesh;
             chunk.GetComponent<MeshCollider>().sharedMesh = chunkMesh;
+            chunk.transform.parent = rotationParent.transform;
+            int rotationMultiplier = Random.Range(0, 3);
+            //rotationParent.transform.RotateAround(rotationParent,)
+            //rotationParent.transform.localRotation = Quaternion.Euler(0, 90*rotationMultiplier, 0);
             Camera.main.gameObject.transform.position = new Vector3(chunk.transform.position.x + xsize/2 , Camera.main.transform.position.y, chunk.transform.position.z + ysize/2);
-            chunk.transform.parent = transform;
+            rotationParent.transform.parent = transform;
             
         }
         
