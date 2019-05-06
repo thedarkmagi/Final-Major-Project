@@ -85,6 +85,16 @@ public class MouseInput : MonoBehaviour
         {
             gameCanvas.SetActive(true);
         }
+        if(Input.GetKeyDown(KeyCode.Escape))
+        {
+            var genManager = GameObject.Find("Generation Manager");
+            foreach (Transform item in genManager.transform)
+            {
+                Destroy(item.gameObject);
+            }
+            gameCanvas.SetActive(false);
+            MenuCanvas.SetActive(true);
+        }
     }
     #region mouse state functions for buttons
     public void setSelectedToken(GameObject token)

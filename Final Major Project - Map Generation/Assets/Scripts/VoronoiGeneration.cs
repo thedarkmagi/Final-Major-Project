@@ -84,6 +84,7 @@ public class VoronoiGeneration : MonoBehaviour
 
     void generateMesh(int xOffSet, int yOffSet)
     {
+        elevations.Clear();
         polygon = new Polygon();
         mesh = null;
         for (int i = 0; i < randomPoints; i++)
