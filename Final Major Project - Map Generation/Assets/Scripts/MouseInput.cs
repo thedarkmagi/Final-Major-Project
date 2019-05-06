@@ -11,6 +11,7 @@ public class MouseInput : MonoBehaviour
 
     public List<ScaleIcon> allButtons = new List<ScaleIcon>();
 
+    private GameObject gameCanvas;
     //Ruler Variables
     private Vector3 firstClickPos;
     private Vector3 secondPos;
@@ -37,8 +38,9 @@ public class MouseInput : MonoBehaviour
         // ruler setup
         firstClickHasHappened = false;
         lineRenderer = GetComponent<LineRenderer>();
-        distanceDisplay = GameObject.Find("Distance").GetComponent<Text>();
-
+        distanceDisplay = GameObject.Find("DistanceRuler").GetComponent<Text>();
+        gameCanvas = GameObject.Find("GameCanvas");
+        gameCanvas.SetActive(false);
         selectedToken = null;
     }
     
