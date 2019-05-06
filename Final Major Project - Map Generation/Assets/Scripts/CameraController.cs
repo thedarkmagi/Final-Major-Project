@@ -10,7 +10,7 @@ public class CameraController : MonoBehaviour
     public float FOVChangeAmount;
 
     private int screenWidth, screenHeight;
-    public int boundary;
+    public float minBoundary, maxBoundary;
     public float speed;
     private Vector3 modifyPosition;
     // Start is called before the first frame update
@@ -39,20 +39,20 @@ public class CameraController : MonoBehaviour
         }
 
         modifyPosition = Vector3.zero;
-        if (Input.mousePosition.x > screenWidth - boundary)
+        if (Input.mousePosition.x > screenWidth * maxBoundary)
         {
             modifyPosition.x = speed * Time.deltaTime;
         }
-        else if (Input.mousePosition.x < boundary)
+        else if (Input.mousePosition.x < minBoundary * screenWidth)
         {
             modifyPosition.x = -(speed * Time.deltaTime);
         }
 
-        if (Input.mousePosition.y > screenHeight - boundary)
+        if (Input.mousePosition.y > screenHeight * maxBoundary)
         {
             modifyPosition.z = speed * Time.deltaTime;
         }
-        else if (Input.mousePosition.y < boundary)
+        else if (Input.mousePosition.y < minBoundary * screenHeight )
         {
             modifyPosition.z = -(speed * Time.deltaTime);
         }
