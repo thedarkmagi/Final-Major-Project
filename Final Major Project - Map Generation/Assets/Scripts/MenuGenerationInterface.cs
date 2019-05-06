@@ -9,6 +9,7 @@ public class MenuGenerationInterface : MonoBehaviour
     {
         public chunkSize chunkSize;
         public float islandThreshHold;
+        public bool useImagePool;
     }
     public struct chunkSize
     {
@@ -32,6 +33,9 @@ public class MenuGenerationInterface : MonoBehaviour
     void Start()
     {
         generator = FindObjectOfType<VoronoiGeneration>();
+        generationSettings.islandThreshHold = 0.5f;
+        generationSettings.useImagePool = true;
+
 
         #region size values initialtion
         small.nPointsInputted = 1000;
@@ -57,13 +61,18 @@ public class MenuGenerationInterface : MonoBehaviour
 
 
 
-    public void setIslandThreshold()
+
+    public void setIslandThreshold(float input)
     {
-         generationSettings.islandThreshHold = islandThreshHold.value;
+        generationSettings.islandThreshHold = input;
     }
     public void setSelectedSize()
     {
         selectedSizeIndex = sizeDropdown.value;
+    }
+    public void setUseImagePool(bool input)
+    {
+        generationSettings.useImagePool = input;
     }
     public void startGeneration()
     {

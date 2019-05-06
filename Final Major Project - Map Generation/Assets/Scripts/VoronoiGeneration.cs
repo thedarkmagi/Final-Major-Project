@@ -6,7 +6,7 @@ using TriangleNet.Topology;
 
 public class VoronoiGeneration : MonoBehaviour
 {
-    private const float islandHeight = 0.5f;
+    private float islandHeight = 0.5f;
     TriangleNet.Mesh mesh;
     TriangleNet.Mesh shrunkMesh;
     Polygon polygon;
@@ -45,7 +45,8 @@ public class VoronoiGeneration : MonoBehaviour
         randomPoints = settings.chunkSize.nPointsInputted;
         xsize = settings.chunkSize.Xsize;
         ysize = settings.chunkSize.Ysize;
-        minimumHeightForLand = settings.islandThreshHold;
+        islandHeight = settings.islandThreshHold;
+        useImagePool = settings.useImagePool;
     }
 
     public void StartGeneration()
@@ -146,18 +147,7 @@ public class VoronoiGeneration : MonoBehaviour
 
     }
 
-    float defineIsland(float height)
-    {
-        if (height > minimumHeightForLand)
-        {
-            height = maxMeshHeight;
-        }
-        else
-        {
-            height = 0;
-        }
-        return height;
-    }
+    
     float defineIsland(float height, Vertex vertex)
     {
         if (height > islandHeight && !enforceWaterEdge(vertex))
@@ -174,6 +164,18 @@ public class VoronoiGeneration : MonoBehaviour
     }
 
     #region unused stuff that I should delete
+    float defineIsland(float height)
+    {
+        if (height > minimumHeightForLand)
+        {
+            height = maxMeshHeight;
+        }
+        else
+        {
+            height = 0;
+        }
+        return height;
+    }
     void findMountainPeak(Dictionary<int, Vertex> vertices)
     {
         //use this to work out if the vert isn't connected to current island?? 
