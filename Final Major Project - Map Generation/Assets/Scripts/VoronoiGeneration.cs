@@ -33,6 +33,8 @@ public class VoronoiGeneration : MonoBehaviour
     private int selectedImagePoolIndex;
     public bool useImagePool;
     public bool enabledElevation;
+    public bool useCustomImage;
+    public Texture2D customImage;
 
     public bool usePerlinNoise;
     IEnumerator delayStart()
@@ -55,6 +57,7 @@ public class VoronoiGeneration : MonoBehaviour
         chunksPerEdge = settings.nChunks;
         selectedImagePoolIndex = settings.selectedImagePoolIndex;
         usePerlinNoise = settings.usePerlin;
+        useCustomImage = settings.useCustomImage;
     }
 
     public void StartGeneration()
@@ -109,19 +112,26 @@ public class VoronoiGeneration : MonoBehaviour
 
         int maxX = 0;
         int maxY = 0;
-        if (useImagePool)
+        if (useCustomImage)
         {
-            circleGradient = typesOfImages[selectedImagePoolIndex][randomMap];
-            maxW = typesOfImages[selectedImagePoolIndex][randomMap].width;
-            maxH = typesOfImages[selectedImagePoolIndex][randomMap].height;
-        }
-        else
-        {
+            circleGradient = customImage;
             maxW = circleGradient.width;
             maxH = circleGradient.height;
         }
-        
-
+        else
+        {
+            if (useImagePool)
+            {
+                circleGradient = typesOfImages[selectedImagePoolIndex][randomMap];
+                maxW = typesOfImages[selectedImagePoolIndex][randomMap].width;
+                maxH = typesOfImages[selectedImagePoolIndex][randomMap].height;
+            }
+            else
+            {
+                maxW = circleGradient.width;
+                maxH = circleGradient.height;
+            }
+        }
         for (int i = 0; i < mesh.vertices.Count; i++)
         {
             float sample;

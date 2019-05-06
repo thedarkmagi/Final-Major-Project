@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Crosstales.FB;
+using System.IO;
 
 public class MenuGenerationInterface : MonoBehaviour
 {
@@ -14,7 +16,7 @@ public class MenuGenerationInterface : MonoBehaviour
         public bool useImagePool;
         public bool useElevationSystem;
         public bool usePerlin;
-        
+        public bool useCustomImage;
     }
     public struct chunkSize
     {
@@ -77,7 +79,21 @@ public class MenuGenerationInterface : MonoBehaviour
         
     }
 
-
+    public void resetValues()
+    {
+        generationSettings.islandThreshHold = 0.5f;
+        generationSettings.useImagePool = true;
+        generationSettings.useElevationSystem = false;
+        generationSettings.usePerlin = false;
+        generationSettings.useCustomImage = false;
+        generationSettings.nChunks = 1;
+        generationSettings.selectedImagePoolIndex = 0;
+        selectedSizeIndex = 0;
+    }
+    public void OnEnable()
+    {
+        resetValues();
+    }
 
     public void setIslandThreshold(float input)
     {
@@ -134,5 +150,24 @@ public class MenuGenerationInterface : MonoBehaviour
         generator.SetGenerationSettings(generationSettings);
         generator.StartGeneration();
         gameObject.SetActive(false);
+    }
+
+
+    public void selectFile()
+    {
+        string path = FileBrowser.OpenSingleFile();
+        Texture2D tex = null;
+        byte[] fileData;
+
+        if (File.Exists(path))
+        {
+            fileData = File.ReadAllBytes(path);
+            tex = new Texture2D(2, 2);
+            tex.LoadImage(fileData); 
+
+            generator.customImage = tex;
+            generationSettings.useCustomImage = true;
+        }
+        
     }
 }
