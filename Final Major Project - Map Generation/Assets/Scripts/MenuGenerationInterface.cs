@@ -9,7 +9,11 @@ public class MenuGenerationInterface : MonoBehaviour
     {
         public chunkSize chunkSize;
         public float islandThreshHold;
+        public int nChunks;
+        public int selectedImagePoolIndex;
         public bool useImagePool;
+        public bool useElevationSystem;
+        
     }
     public struct chunkSize
     {
@@ -35,8 +39,10 @@ public class MenuGenerationInterface : MonoBehaviour
         generator = FindObjectOfType<VoronoiGeneration>();
         generationSettings.islandThreshHold = 0.5f;
         generationSettings.useImagePool = true;
-
-
+        generationSettings.useElevationSystem = false;
+        generationSettings.nChunks = 1;
+        generationSettings.selectedImagePoolIndex = 0;
+        selectedSizeIndex = 0;
         #region size values initialtion
         small.nPointsInputted = 1000;
         small.Xsize = 250;
@@ -66,16 +72,34 @@ public class MenuGenerationInterface : MonoBehaviour
     {
         generationSettings.islandThreshHold = input;
     }
+    public void setNChunks(float input)
+    {
+        generationSettings.nChunks =Mathf.FloorToInt(input);
+    }
     public void setSelectedSize()
     {
         selectedSizeIndex = sizeDropdown.value;
+    }
+    public void setSelectedImagePool(int input)
+    {
+        generationSettings.selectedImagePoolIndex = input;
     }
     public void setUseImagePool(bool input)
     {
         generationSettings.useImagePool = input;
     }
+    public void setUseElevation(bool input)
+    {
+        generationSettings.useElevationSystem = input;
+    }
     public void startGeneration()
     {
+        //this is simply a check to stop me accidently trying to generate a larger size as it'll take at least 1hour 40min to finish generating
+        if(generationSettings.useElevationSystem)
+        {
+            selectedSizeIndex = 0;
+        }
+
         generationSettings.chunkSize = sizeList[selectedSizeIndex];
         generator.SetGenerationSettings(generationSettings);
         generator.StartGeneration();

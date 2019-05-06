@@ -26,7 +26,11 @@ public class VoronoiGeneration : MonoBehaviour
     private TriangleNet.Voronoi.BoundedVoronoi boundedVoronoi;
 
     public Texture2D circleGradient;
-    public List<Texture2D> genMaps;
+    public List<Texture2D> genMaps = new List<Texture2D>();
+    public List<Texture2D> blobsOnlyMaps = new List<Texture2D>();
+    public List<Texture2D> allOfTheImages = new List<Texture2D>();
+    private List<List<Texture2D>> typesOfImages = new List<List<Texture2D>>();
+    private int selectedImagePoolIndex;
     public bool useImagePool;
     public bool enabledElevation;
 
@@ -47,6 +51,9 @@ public class VoronoiGeneration : MonoBehaviour
         ysize = settings.chunkSize.Ysize;
         islandHeight = settings.islandThreshHold;
         useImagePool = settings.useImagePool;
+        enabledElevation = settings.useElevationSystem;
+        chunksPerEdge = settings.nChunks;
+        selectedImagePoolIndex = settings.selectedImagePoolIndex;
     }
 
     public void StartGeneration()
@@ -62,6 +69,9 @@ public class VoronoiGeneration : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        typesOfImages.Add(blobsOnlyMaps);
+        typesOfImages.Add(genMaps);
+        typesOfImages.Add(allOfTheImages);
         //StartCoroutine(delayStart());
     }
 
@@ -89,19 +99,19 @@ public class VoronoiGeneration : MonoBehaviour
         meshBounds = new Bounds(new Vector3((float)mesh.Bounds.Left - (float)mesh.Bounds.Right, (float)mesh.Bounds.Top - (float)mesh.Bounds.Bottom), new Vector3((float)mesh.Bounds.Width, (float)mesh.Bounds.Height));
         //print(meshBounds.extents);
 
-        int randomMap = Random.Range(0, genMaps.Count);
+        int randomMap = Random.Range(0, typesOfImages[selectedImagePoolIndex].Count);
 
         int min = 0;
         int maxW; 
         int maxH; 
-        int max = 1024;
+
         int maxX = 0;
         int maxY = 0;
         if (useImagePool)
         {
-            circleGradient = genMaps[randomMap];
-            maxW = genMaps[randomMap].width;
-            maxH = genMaps[randomMap].height;
+            circleGradient = typesOfImages[selectedImagePoolIndex][randomMap];
+            maxW = typesOfImages[selectedImagePoolIndex][randomMap].width;
+            maxH = typesOfImages[selectedImagePoolIndex][randomMap].height;
         }
         else
         {
@@ -117,6 +127,7 @@ public class VoronoiGeneration : MonoBehaviour
             {
                 sample = Mathf.PerlinNoise((float)mesh.vertices[i].x + xOffSet, (float)mesh.vertices[i].y + yOffSet);
                 //print("vertextPosition:" + (float)mesh.vertices[i].x + " " + (float)mesh.vertices[i].y);
+                print("we're perlin noising illegally ");
             }
             else
             {
