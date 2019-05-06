@@ -103,5 +103,6 @@ public class MenuGenerationInterface : MonoBehaviour
         generationSettings.chunkSize = sizeList[selectedSizeIndex];
         generator.SetGenerationSettings(generationSettings);
         generator.StartGeneration();
+        gameObject.SetActive(false);
     }
 }

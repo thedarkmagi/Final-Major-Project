@@ -12,6 +12,7 @@ public class MouseInput : MonoBehaviour
     public List<ScaleIcon> allButtons = new List<ScaleIcon>();
 
     private GameObject gameCanvas;
+    public GameObject MenuCanvas;
     //Ruler Variables
     private Vector3 firstClickPos;
     private Vector3 secondPos;
@@ -71,6 +72,19 @@ public class MouseInput : MonoBehaviour
                 break;
         }
         
+        if(gameCanvas.activeSelf)
+        {
+            MenuCanvas.SetActive(false);
+        }
+        else if (MenuCanvas.activeSelf)
+        {
+            gameCanvas.SetActive(false);
+            
+        }
+        else
+        {
+            gameCanvas.SetActive(true);
+        }
     }
     #region mouse state functions for buttons
     public void setSelectedToken(GameObject token)

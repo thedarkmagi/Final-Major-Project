@@ -3159,6 +3159,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allButtons: []
+  MenuCanvas: {fileID: 1143683097}
   customLabelPrefab: {fileID: 3553885728426365009, guid: b6d5f91d4093a1d48995a3619f7c79c5,
     type: 3}
   token: {fileID: 7796028458293497768, guid: 4dd69ddc82aaa114fb59c309447f893f, type: 3}
@@ -3274,7 +3275,7 @@ MonoBehaviour:
   FOVMax: 140
   FOVChangeAmount: 1
   boundary: 50
-  speed: 20
+  speed: 0
 --- !u!1 &1126869191
 GameObject:
   m_ObjectHideFlags: 0
@@ -4321,8 +4322,9 @@ GameObject:
   - component: {fileID: 1386378627}
   - component: {fileID: 1386378626}
   - component: {fileID: 1386378625}
+  - component: {fileID: 1386378629}
   m_Layer: 0
-  m_Name: Plane
+  m_Name: background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4337,7 +4339,7 @@ MeshCollider:
   m_GameObject: {fileID: 1386378624}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 3
   m_Convex: 0
   m_CookingOptions: 14
@@ -4359,7 +4361,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 41ec399ad99d7d84d9cfc498885ee343, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -4386,7 +4388,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1386378624}
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!4 &1386378628
 Transform:
   m_ObjectHideFlags: 0
@@ -4395,12 +4397,24 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1386378624}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 348, y: -456.0664, z: 568}
-  m_LocalScale: {x: 180, y: 180, z: 180}
+  m_LocalPosition: {x: 0, y: -1, z: 0}
+  m_LocalScale: {x: 10000, y: 0.1, z: 10000}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1386378629
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1386378624}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f64f9d28e1334742abc5183461d54ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1429169307
 GameObject:
   m_ObjectHideFlags: 0
