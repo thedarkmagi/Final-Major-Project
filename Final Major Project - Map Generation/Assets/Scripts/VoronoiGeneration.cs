@@ -154,7 +154,7 @@ public class VoronoiGeneration : MonoBehaviour
                 //print("vertex: " + i + " X:" + x + " Y:" + y + " Sampled value: " + sample);
             }
             sample = defineIsland(sample, mesh.vertices[i]);
-
+            
             elevations.Add(sample);
         }
         //print("Max X: " + maxX + " Max Y: " + maxY);
@@ -168,13 +168,28 @@ public class VoronoiGeneration : MonoBehaviour
 
     }
 
-    
+    float defineIslandHeights(float height, Vertex vertex)
+    {
+        if(vertex.biomeType == BiomeType.land)
+        {
+            float rand = Random.Range(1, 100);
+            float sample = Mathf.PerlinNoise((float)vertex.x*rand, (float)vertex.y * rand);
+            if(sample<0.5f)
+            {
+                sample = 0;
+            }
+            height += maxMeshHeight * sample;
+        }
+        return height;
+    }
+
     float defineIsland(float height, Vertex vertex)
     {
         if (height > islandHeight && !enforceWaterEdge(vertex))
         {
             height = maxMeshHeight;
             vertex.biomeType = BiomeType.land;
+            height = defineIslandHeights(height, vertex);
         }
         else
         {
@@ -611,9 +626,13 @@ public class VoronoiGeneration : MonoBehaviour
         {
             return Color.blue;
         }
-        else
+        else if(point.y <=maxMeshHeight)
         {
             return Color.green;
+        }
+        else
+        {
+            return Color.gray;
         }
     }
     public Color getBiomeType(Vertex vert)
