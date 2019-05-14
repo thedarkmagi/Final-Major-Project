@@ -369,7 +369,8 @@ public class VoronoiGeneration : MonoBehaviour
                 List<int> borderVerts = findBorderVerts(trisList, vertBiomes, chunkMesh, BiomeType.land, BiomeType.water);
                 //printList(borderVerts);
 
-                findCentreOfIsland(chunkMesh, vertBiomes, borderVerts, vertCons);
+                //findCentreOfIsland(chunkMesh, vertBiomes, borderVerts, vertCons);
+                findCentreOfIslandSimple(chunkMesh, vertBiomes, borderVerts, vertCons);
             }
             //GameObject chunk = Instantiate<GameObject>(chunkPrefab, transform.position, transform.rotation);
             GameObject rotationParent = new GameObject();
@@ -494,6 +495,37 @@ public class VoronoiGeneration : MonoBehaviour
         return result;
     }
 
+    void findCentreOfIslandSimple(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, VertexConnection[] vertCons)
+    {
+        int borderVert1, borderVert2;
+        borderVert1 = Random.Range(0, borderVerts.Count);
+        borderVert2 = Random.Range(0, borderVerts.Count);
+        Vector3 midpoint = midpointFormula(mesh.vertices[borderVert1], mesh.vertices[borderVert2]);
+        float currentDistance = float.MaxValue;
+        int selectedIndex=0;
+        for (int i = 0; i < mesh.vertices.Length; i++)
+        {
+            if (vertBiomes[i] == BiomeType.land)
+            {
+                //islandVertDistancesFromBorder[i] = distanceBetweenBorderVertandAnyOther(mesh, i, borderVerts);
+                float checkedDistance = distanceBetweenAnyVertandAnyOther(mesh, midpoint, i, currentDistance);
+                if(checkedDistance!=currentDistance)
+                {
+                    selectedIndex = i;
+                    currentDistance = checkedDistance;
+                }
+            }
+        }
+        mesh.vertices = updateVertPositionsFromList(findVertsOfTheSamePosition(vertCons, selectedIndex), mesh, 0, 100, 0);
+
+    }
+
+    Vector3 midpointFormula(Vector3 one, Vector3 two)
+    {
+        Vector3 result = new Vector3(one.x + two.x / 2, one.y + two.y / 2, one.z + two.z / 2);
+        return result;
+    }
+
     void findCentreOfIsland(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, VertexConnection[] vertCons)
     {
         Dictionary<int, float> islandVertDistancesFromBorder = new Dictionary<int, float>();
@@ -515,7 +547,7 @@ public class VoronoiGeneration : MonoBehaviour
             }
         }
         mesh.vertices = updateVertPositionsFromList(findVertsOfTheSamePosition(vertCons, indexOfCentreVertex), mesh, 0,100,0);
-        Instantiate(new GameObject(), mesh.vertices[indexOfCentreVertex], Quaternion.identity);
+        //Instantiate(new GameObject(), mesh.vertices[indexOfCentreVertex], Quaternion.identity);
     }
 
     Vector3[] updateVertPositionsFromList(List<int> vertIndexs, Mesh mesh, int xMod=0, int yMod=0, int zMod =0)
@@ -542,6 +574,16 @@ public class VoronoiGeneration : MonoBehaviour
         }
         return result;
     }
+    float distanceBetweenAnyVertandAnyOther(Mesh mesh, Vector3 point, int vertexIndex, float currentSmallest)
+    {
+        float result = currentSmallest;
+        if (sqrDistance(point, mesh.vertices[vertexIndex]) < result)
+        {
+            result = sqrDistance(point, mesh.vertices[vertexIndex]);
+        }
+        return result;
+    }
+
     #region helper Class from https://answers.unity.com/questions/371115/is-there-an-easy-way-to-find-connected-vertices.html 
     public class VertexConnection
     {
