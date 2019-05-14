@@ -515,24 +515,26 @@ public class VoronoiGeneration : MonoBehaviour
         Vector3 midpoint = midpointFormula(mesh.vertices[borderVert1], mesh.vertices[borderVert2]);
         float currentDistance = float.MaxValue;
         int selectedIndex=0;
-        for (int i = 0; i < mesh.vertices.Length; i++)
-        {
-            if (vertBiomes[i] == BiomeType.land)
-            {
-                //islandVertDistancesFromBorder[i] = distanceBetweenBorderVertandAnyOther(mesh, i, borderVerts);
-                float checkedDistance = distanceBetweenAnyVertandAnyOther(mesh, midpoint, i, currentDistance);
-                if(checkedDistance!=currentDistance)
-                {
-                    selectedIndex = i;
-                    currentDistance = checkedDistance;
-                }
-            }
-        }
-        //do
+        //for (int i = 0; i < mesh.vertices.Length; i++)
         //{
-        //    selectedIndex = Random.Range(0, mesh.vertices.Length);
+        //    if (vertBiomes[i] == BiomeType.land)
+        //    {
+        //        //islandVertDistancesFromBorder[i] = distanceBetweenBorderVertandAnyOther(mesh, i, borderVerts);
+        //        float checkedDistance = distanceBetweenAnyVertandAnyOther(mesh, midpoint, i, currentDistance);
+        //        if(checkedDistance!=currentDistance)
+        //        {
+        //            selectedIndex = i;
+        //            currentDistance = checkedDistance;
+        //        }
+        //    }
         //}
-        //while (borderVerts.Contains(selectedIndex) && vertBiomes[selectedIndex] != BiomeType.land);
+        do
+        {
+            selectedIndex = Random.Range(0, mesh.vertices.Length);
+            if (!borderVerts.Contains(selectedIndex) && vertBiomes[selectedIndex] == BiomeType.land)
+                break;
+        }
+        while (borderVerts.Contains(selectedIndex) && vertBiomes[selectedIndex] != BiomeType.land);
         //selectedIndex = mesh.vertices.Length / 2;
 
         mesh.vertices = updateVertPositionsFromList(findVertsOfTheSamePosition(vertCons, selectedIndex), mesh, 0, 100, 0);
