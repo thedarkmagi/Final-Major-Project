@@ -41,7 +41,13 @@ public class VoronoiGeneration : MonoBehaviour
     {
         print("Starting");
         yield return new WaitForSeconds(0);
-        
+        for (int i = 0; i < chunksPerEdge; i++)
+        {
+            for (int j = 0; j < chunksPerEdge; j++)
+            {
+                generateMesh(xsize * i, ysize * j);
+            }
+        }
         print("finishing");
         //Debug.Break();
     }
@@ -62,6 +68,9 @@ public class VoronoiGeneration : MonoBehaviour
 
     public void StartGeneration()
     {
+
+        print("Starting");
+
         for (int i = 0; i < chunksPerEdge; i++)
         {
             for (int j = 0; j < chunksPerEdge; j++)
@@ -69,6 +78,7 @@ public class VoronoiGeneration : MonoBehaviour
                 generateMesh(xsize * i, ysize * j);
             }
         }
+        print("finishing");
     }
     // Start is called before the first frame update
     void Start()
@@ -76,7 +86,7 @@ public class VoronoiGeneration : MonoBehaviour
         typesOfImages.Add(blobsOnlyMaps);
         typesOfImages.Add(genMaps);
         typesOfImages.Add(allOfTheImages);
-        //StartCoroutine(delayStart());
+        //
     }
 
 
@@ -370,7 +380,7 @@ public class VoronoiGeneration : MonoBehaviour
                 //printList(borderVerts);
 
                 //findCentreOfIsland(chunkMesh, vertBiomes, borderVerts, vertCons);
-                findCentreOfIslandSimple(chunkMesh, vertBiomes, borderVerts, vertCons);
+                findCentreOfIslandSimple(chunkMesh, vertBiomes, borderVerts, vertCons, trisList);
             }
             //GameObject chunk = Instantiate<GameObject>(chunkPrefab, transform.position, transform.rotation);
             GameObject rotationParent = new GameObject();
@@ -495,11 +505,13 @@ public class VoronoiGeneration : MonoBehaviour
         return result;
     }
 
-    void findCentreOfIslandSimple(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, VertexConnection[] vertCons)
+    void findCentreOfIslandSimple(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, VertexConnection[] vertCons, List<List<int>> triList)
     {
         int borderVert1, borderVert2;
-        borderVert1 = Random.Range(0, borderVerts.Count);
-        borderVert2 = Random.Range(0, borderVerts.Count);
+        borderVert1 = borderVerts[Random.Range(0, borderVerts.Count/2)];
+        borderVert2 = borderVerts[Random.Range(borderVerts.Count / 2, borderVerts.Count)];
+        //borderVert1 = borderVerts[0];
+        //borderVert2 = borderVerts[borderVerts.Count-1];
         Vector3 midpoint = midpointFormula(mesh.vertices[borderVert1], mesh.vertices[borderVert2]);
         float currentDistance = float.MaxValue;
         int selectedIndex=0;
@@ -517,7 +529,8 @@ public class VoronoiGeneration : MonoBehaviour
             }
         }
         mesh.vertices = updateVertPositionsFromList(findVertsOfTheSamePosition(vertCons, selectedIndex), mesh, 0, 100, 0);
-
+        //updateElevationOfMap(mesh, vertBiomes, borderVerts, vertCons, triList, selectedIndex);
+        mesh.vertices = updateElevationSimple(mesh, vertBiomes, borderVerts, vertCons, triList, selectedIndex);
     }
 
     Vector3 midpointFormula(Vector3 one, Vector3 two)
@@ -560,6 +573,82 @@ public class VoronoiGeneration : MonoBehaviour
 
         return templist;
     }
+
+    Vector3 updateVertPositions(int vertIndex, Mesh mesh, int xMod = 0, float yMod = 0, int zMod = 0)
+    {
+        Vector3 temp;
+        temp = new Vector3(mesh.vertices[vertIndex].x + xMod, mesh.vertices[vertIndex].y + yMod, mesh.vertices[vertIndex].z + zMod);
+        return temp;
+    }
+    Vector3[] updateElevationOfMap(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, VertexConnection[] vertCons, List<List<int>> triList, int mountainPeakVert)
+    {
+        Vector3[] templist = mesh.vertices;
+
+        List<int> adjecentVertIndexs = new List<int>();
+        Dictionary<int, bool> hasBeenAltered = new Dictionary<int, bool>();
+        for (int k = 0; k < borderVerts.Count; k++)
+        {
+            float distance = sqrDistance(mesh.vertices[borderVerts[k]], mesh.vertices[mountainPeakVert]);
+            for (int i = 0; i < triList.Count; i++)
+            {
+                for (int j = 0; j < triList[i].Count; j++)
+                {
+                    if (triList[i].Contains(borderVerts[k]))
+                    {
+                        if (triList[i][j] != borderVerts[k])
+                        {
+                            hasBeenAltered.Add(triList[i][j], true);
+                            if (distance > sqrDistance(mesh.vertices[triList[i][j]], mesh.vertices[mountainPeakVert]))
+                            {
+                                adjecentVertIndexs.Add(triList[i][j]);
+                                adjecentVertIndexs.AddRange(findVertsOfTheSamePosition(vertCons, triList[i][j]));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        mesh.vertices = updateVertPositionsFromList(adjecentVertIndexs, mesh, 0, 100, 0);
+
+        return templist;
+    }
+
+    Vector3[] updateElevationSimple(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, VertexConnection[] vertCons, List<List<int>> triList, int mountainPeakVert)
+    {
+        Vector3[] templist = mesh.vertices;
+        float currentDistance = float.MaxValue;
+        int selectedIndex = 0;
+
+        float minScaledHeight = mesh.vertices[borderVerts[0]].y;
+        float maxScaledHeight = mesh.vertices[mountainPeakVert].y;
+        float minDistance = 0;
+        float maxDistance=float.MinValue;
+        for (int i = 0; i < mesh.vertices.Length; i++)
+        {
+            if (vertBiomes[i] == BiomeType.land)
+            {
+                float checkedDistance = distanceBetweenAnyVertandAnyOther(mesh, mesh.vertices[mountainPeakVert], i, float.MaxValue);
+                if(checkedDistance>maxDistance)
+                {
+                    maxDistance = checkedDistance;
+                }
+            }
+        }
+
+        for (int i = 0; i < mesh.vertices.Length; i++)
+        {
+            if (vertBiomes[i] == BiomeType.land)
+            {
+                float checkedDistance = distanceBetweenAnyVertandAnyOther(mesh, mesh.vertices[mountainPeakVert], i, float.MaxValue);
+                float newHeight = normalise(checkedDistance, maxDistance,  minDistance, minScaledHeight, maxScaledHeight);
+                templist[i] = updateVertPositions(i, mesh, 0, newHeight, 0);
+            }
+        }
+
+        return templist;
+    }
+
 
     float distanceBetweenBorderVertandAnyOther(Mesh mesh, int vertIndex, List<int> borderVerts)
     {
