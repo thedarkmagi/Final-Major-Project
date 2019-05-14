@@ -379,7 +379,7 @@ public class VoronoiGeneration : MonoBehaviour
                 List<int> borderVerts = findBorderVerts(trisList, vertBiomes, chunkMesh, BiomeType.land, BiomeType.water);
                 //printList(borderVerts);
 
-                //findCentreOfIsland(chunkMesh, vertBiomes, borderVerts, vertCons);
+                //findCentreOfIsland(chunkMesh, vertBiomes, borderVerts, vertCons, trisList);
                 findCentreOfIslandSimple(chunkMesh, vertBiomes, borderVerts, vertCons, trisList);
             }
             //GameObject chunk = Instantiate<GameObject>(chunkPrefab, transform.position, transform.rotation);
@@ -528,6 +528,13 @@ public class VoronoiGeneration : MonoBehaviour
                 }
             }
         }
+        //do
+        //{
+        //    selectedIndex = Random.Range(0, mesh.vertices.Length);
+        //}
+        //while (borderVerts.Contains(selectedIndex) && vertBiomes[selectedIndex] != BiomeType.land);
+        //selectedIndex = mesh.vertices.Length / 2;
+
         mesh.vertices = updateVertPositionsFromList(findVertsOfTheSamePosition(vertCons, selectedIndex), mesh, 0, 100, 0);
         //updateElevationOfMap(mesh, vertBiomes, borderVerts, vertCons, triList, selectedIndex);
         mesh.vertices = updateElevationSimple(mesh, vertBiomes, borderVerts, vertCons, triList, selectedIndex);
@@ -539,7 +546,7 @@ public class VoronoiGeneration : MonoBehaviour
         return result;
     }
 
-    void findCentreOfIsland(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, VertexConnection[] vertCons)
+    void findCentreOfIsland(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, VertexConnection[] vertCons, List<List<int>> triList)
     {
         Dictionary<int, float> islandVertDistancesFromBorder = new Dictionary<int, float>();
         for (int i = 0; i < mesh.vertices.Length; i++)
@@ -561,6 +568,7 @@ public class VoronoiGeneration : MonoBehaviour
         }
         mesh.vertices = updateVertPositionsFromList(findVertsOfTheSamePosition(vertCons, indexOfCentreVertex), mesh, 0,100,0);
         //Instantiate(new GameObject(), mesh.vertices[indexOfCentreVertex], Quaternion.identity);
+        mesh.vertices = updateElevationSimple(mesh, vertBiomes, borderVerts, vertCons, triList, indexOfCentreVertex);
     }
 
     Vector3[] updateVertPositionsFromList(List<int> vertIndexs, Mesh mesh, int xMod=0, int yMod=0, int zMod =0)
@@ -636,13 +644,28 @@ public class VoronoiGeneration : MonoBehaviour
             }
         }
 
+
+        List<int> excludedVerts = new List<int>();
+        for (int i = 0; i < borderVerts.Count; i++)
+        {
+            excludedVerts.AddRange(findVertsOfTheSamePosition(vertCons, borderVerts[i]));
+        }
+        //excludedVerts.AddRange(borderVerts);
+        excludedVerts.AddRange(findVertsOfTheSamePosition(vertCons, mountainPeakVert));
         for (int i = 0; i < mesh.vertices.Length; i++)
         {
-            if (vertBiomes[i] == BiomeType.land)
+            if (i != mountainPeakVert)
             {
-                float checkedDistance = distanceBetweenAnyVertandAnyOther(mesh, mesh.vertices[mountainPeakVert], i, float.MaxValue);
-                float newHeight = normalise(checkedDistance, maxDistance,  minDistance, minScaledHeight, maxScaledHeight);
-                templist[i] = updateVertPositions(i, mesh, 0, newHeight, 0);
+                if (!excludedVerts.Contains(i))
+                {
+                    if (vertBiomes[i] == BiomeType.land)
+                    {
+
+                        float checkedDistance = distanceBetweenAnyVertandAnyOther(mesh, mesh.vertices[mountainPeakVert], i, float.MaxValue);
+                        float newHeight = normalise(checkedDistance, maxDistance, minDistance, minScaledHeight, maxScaledHeight);
+                        templist[i] = updateVertPositions(i, mesh, 0, newHeight, 0);
+                    }
+                }
             }
         }
 
