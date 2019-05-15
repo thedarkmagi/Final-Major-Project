@@ -426,11 +426,35 @@ public class VoronoiGeneration : MonoBehaviour
         List<int> riverVertIndex = new List<int>();
         riverVertIndex.Add(borderEdgeIndex);
         int maxIterations = 7;
+        List<int> allLandIndexs = new List<int>();
+        for (int i = 0; i < vertBiomes.Count; i++)
+        {
+            if (vertBiomes[i] == BiomeType.land)
+            {
+                allLandIndexs.Add(i);
+            }
+        }
+        for (int j = 0; j < 40; j++)
+        {
+            float distance = float.MaxValue;
+            int index = 0;
+            for (int i = 0; i < allLandIndexs.Count; i++)
+            {
+                float temp = sqrDistance(mesh.vertices[allLandIndexs[i]], mesh.vertices[riverVertIndex[riverVertIndex.Count - 1]]);
+                if (temp < distance)
+                {
+                    distance = temp;
+                    index = i;
+                }
+            }
+            riverVertIndex.Add(index);
+        }
+        #region ITERATAIONS
         for (int iterations = 0; iterations < maxIterations; iterations++)
         {
             for (int i = 0; i < triList.Count; i++)
             {
-                if (triList[i].Contains(riverVertIndex[riverVertIndex.Count-1]))
+                if (triList[i].Contains(riverVertIndex[riverVertIndex.Count - 1]))
                 {
                     List<int> possiblePath = new List<int>();
                     for (int j = 0; j < triList[i].Count; j++)
@@ -441,6 +465,7 @@ public class VoronoiGeneration : MonoBehaviour
                             if (vertBiomes[triList[i][j]] == BiomeType.land)
                             {
                                 possiblePath.Add(triList[i][j]);
+                                print("does this happen adding to possible Path");
                             }
                             else
                             {
@@ -460,8 +485,8 @@ public class VoronoiGeneration : MonoBehaviour
                     if (possiblePath.Count >= 2) // should check if any of these are higher than the current vert cuz if they ain't we don't want it
                     {
                         print(vertBiomes[riverVertIndex[riverVertIndex.Count - 1]] + " coming from this point and going to this one" + vertBiomes[possiblePath[1]]); // these were just 0 WHY?
-                        if (mesh.vertices[riverVertIndex[riverVertIndex.Count - 1]].y < mesh.vertices[possiblePath[1]].y)
-                        { 
+                        //if (mesh.vertices[riverVertIndex[riverVertIndex.Count - 1]].y < mesh.vertices[possiblePath[1]].y)
+                        //{
                             if (mesh.vertices[possiblePath[0]].y > mesh.vertices[possiblePath[1]].y)
                             {
                                 riverVertIndex.Add(possiblePath[0]);
@@ -472,9 +497,9 @@ public class VoronoiGeneration : MonoBehaviour
                                 riverVertIndex.Add(possiblePath[1]);
                                 //break;
                             }
-                        }
+                        //}
                     }
-                    else if(possiblePath.Count>1)
+                    else if (possiblePath.Count > 1)
                     {
                         riverVertIndex.Add(possiblePath[0]);
                     }
@@ -484,6 +509,10 @@ public class VoronoiGeneration : MonoBehaviour
             riverVertIndex.AddRange(findVertsOfTheSamePosition(vertCons, riverVertIndex[riverVertIndex.Count - 1]));
             riverVertIndex = riverVertIndex.Distinct().ToList();
         }
+        #endregion
+
+
+
         //store the list of points
         List<Vector3> riverVertPositions = new List<Vector3>();
         for (int i = 0; i < riverVertIndex.Count; i++)
