@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TriangleNet.Geometry;
 using TriangleNet.Topology;
+using System.Linq;
 
 public class VoronoiGeneration : MonoBehaviour
 {
@@ -35,6 +36,8 @@ public class VoronoiGeneration : MonoBehaviour
     public bool enabledElevation;
     public bool useCustomImage;
     public Texture2D customImage;
+
+    public GameObject riverLineRenderer;
 
     public bool usePerlinNoise;
     IEnumerator delayStart()
@@ -377,10 +380,13 @@ public class VoronoiGeneration : MonoBehaviour
                 vertBiomes = setVertBiomes(chunkMesh);
                 //printBiomeDictionary(vertBiomes);
                 List<int> borderVerts = findBorderVerts(trisList, vertBiomes, chunkMesh, BiomeType.land, BiomeType.water);
-                //printList(borderVerts);
+                makeBorderVertsPink(borderVerts, chunkMesh);
 
                 //findCentreOfIsland(chunkMesh, vertBiomes, borderVerts, vertCons, trisList);
                 findCentreOfIslandSimple(chunkMesh, vertBiomes, borderVerts, vertCons, trisList);
+                //print("just before define rivers");
+                //printArrayIfY(chunkMesh.vertices);
+                defineRivers(chunkMesh, vertBiomes, borderVerts, vertCons, trisList);
             }
             //GameObject chunk = Instantiate<GameObject>(chunkPrefab, transform.position, transform.rotation);
             GameObject rotationParent = new GameObject();
@@ -397,12 +403,161 @@ public class VoronoiGeneration : MonoBehaviour
         }
         
     }
+
+    public void makeBorderVertsPink(List<int> borderVerts, Mesh mesh)
+    {
+        Color[] newColours = mesh.colors;
+        for (int i = 0; i < borderVerts.Count; i++)
+        {
+            newColours[borderVerts[i]] = Color.magenta;
+        }
+        mesh.colors = newColours;
+    }
+
+    public void defineRivers(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, VertexConnection[] vertCons, List<List<int>> triList)
+    {
+        //find a possible river
+        //print("in define rivers");
+        //printArrayIfY(mesh.vertices);
+
+        //take border 
+        //loop through triangles? pick heigher of 2 other verts?
+        int borderEdgeIndex = Random.Range(0, borderVerts.Count-1);
+        List<int> riverVertIndex = new List<int>();
+        riverVertIndex.Add(borderEdgeIndex);
+        int maxIterations = 7;
+        for (int iterations = 0; iterations < maxIterations; iterations++)
+        {
+            for (int i = 0; i < triList.Count; i++)
+            {
+                if (triList[i].Contains(riverVertIndex[riverVertIndex.Count-1]))
+                {
+                    List<int> possiblePath = new List<int>();
+                    for (int j = 0; j < triList[i].Count; j++)
+                    {
+                        if (!riverVertIndex.Contains(triList[i][j]))
+                        //if (triList[i][j] != riverVertIndex[riverVertIndex.Count-1])
+                        {
+                            if (vertBiomes[triList[i][j]] == BiomeType.land)
+                            {
+                                possiblePath.Add(triList[i][j]);
+                            }
+                            else
+                            {
+                                List<int> samePlaceVerts = new List<int>();
+                                samePlaceVerts.AddRange(findVertsOfTheSamePosition(vertCons, riverVertIndex[riverVertIndex.Count - 1]));
+                                int errorCheck = checkIfIndexHasLandNextToIt(samePlaceVerts, vertCons, vertBiomes, triList);
+                                if (errorCheck != int.MaxValue)
+                                {
+                                    print("did this work at all???");
+                                    possiblePath.Add(errorCheck);
+                                }
+                            }
+                        }
+                    }
+                    //print("loop number: " + iterations+ " TriList Position: "+ i);
+                    //printList(possiblePath);
+                    if (possiblePath.Count >= 2) // should check if any of these are higher than the current vert cuz if they ain't we don't want it
+                    {
+                        print(vertBiomes[riverVertIndex[riverVertIndex.Count - 1]] + " coming from this point and going to this one" + vertBiomes[possiblePath[1]]); // these were just 0 WHY?
+                        if (mesh.vertices[riverVertIndex[riverVertIndex.Count - 1]].y < mesh.vertices[possiblePath[1]].y)
+                        { 
+                            if (mesh.vertices[possiblePath[0]].y > mesh.vertices[possiblePath[1]].y)
+                            {
+                                riverVertIndex.Add(possiblePath[0]);
+                                //break;
+                            }
+                            else
+                            {
+                                riverVertIndex.Add(possiblePath[1]);
+                                //break;
+                            }
+                        }
+                    }
+                    else if(possiblePath.Count>1)
+                    {
+                        riverVertIndex.Add(possiblePath[0]);
+                    }
+                    possiblePath.Clear();
+                }
+            }
+            riverVertIndex.AddRange(findVertsOfTheSamePosition(vertCons, riverVertIndex[riverVertIndex.Count - 1]));
+            riverVertIndex = riverVertIndex.Distinct().ToList();
+        }
+        //store the list of points
+        List<Vector3> riverVertPositions = new List<Vector3>();
+        for (int i = 0; i < riverVertIndex.Count; i++)
+        {
+            riverVertPositions.Add(mesh.vertices[riverVertIndex[i]]);
+            //print(mesh.vertices[riverVertIndex[i]]);
+        }
+        riverVertPositions = riverVertPositions.Distinct().ToList();
+
+        GameObject lineRender = Instantiate(riverLineRenderer, riverVertPositions[0], Quaternion.identity);
+        lineRender.GetComponent<LineRenderer>().positionCount = riverVertPositions.Count;
+        lineRender.GetComponent<LineRenderer>().SetPositions(riverVertPositions.ToArray());
+        //pass to line renderer
+    }
+
+    public int checkIfIndexHasLandNextToIt(List<int> points, VertexConnection[] vertCons, Dictionary<int, BiomeType> vertBiomes, List<List<int>> triList)
+    {
+        int result = int.MaxValue;
+        for (int k = 0; k < points.Count; k++)
+        {
+            for (int i = 0; i < triList.Count; i++)
+            {
+                if (triList[i].Contains(points[k]))
+                {
+                    //List<int> possiblePath = new List<int>();
+                    for (int j = 0; j < triList[i].Count; j++)
+                    {
+                        if (!points.Contains(triList[i][j]))
+                        //if (triList[i][j] != riverVertIndex[riverVertIndex.Count-1])
+                        {
+                            if (vertBiomes[triList[i][j]] == BiomeType.land)
+                            {
+                                print("do we ever find Land D':");
+                               // possiblePath.Add(triList[i][j]);
+                                result = triList[i][j];
+                                break;
+                            }
+                            else
+                            {
+                                //print("Reccursion Is a Curse");
+                                //points.Clear();
+                                //points.AddRange(findVertsOfTheSamePosition(vertCons,triList[i][j]));
+                                //checkIfIndexHasLandNextToIt(points, vertCons, vertBiomes, triList);
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+        return result;
+    }
+
     #region Custom Print Functions
     public void printList<T>(List<T> list)
     {
         for (int i = 0; i < list.Count; i++)
         {
-            print(list[i] + "BorderVerts");
+            print(list[i]);
+        }
+    }
+    public void printArray(Vector3[] array)
+    {
+        for (int i = 0; i < array.Length; i++)
+        {
+            print(array[i]);
+        }
+    }
+    public void printArrayIfY(Vector3[] array)
+    {
+        for (int i = 0; i < array.Length; i++)
+        {
+            if(array[i].y>0)
+                print(array[i]);
         }
     }
     void printBiomeDictionary(Dictionary<int,BiomeType> dictionary)
@@ -540,6 +695,8 @@ public class VoronoiGeneration : MonoBehaviour
         mesh.vertices = updateVertPositionsFromList(findVertsOfTheSamePosition(vertCons, selectedIndex), mesh, 0, 100, 0);
         //updateElevationOfMap(mesh, vertBiomes, borderVerts, vertCons, triList, selectedIndex);
         mesh.vertices = updateElevationSimple(mesh, vertBiomes, borderVerts, vertCons, triList, selectedIndex);
+
+        
     }
 
     Vector3 midpointFormula(Vector3 one, Vector3 two)
@@ -670,7 +827,6 @@ public class VoronoiGeneration : MonoBehaviour
                 }
             }
         }
-
         return templist;
     }
 

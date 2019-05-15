@@ -1028,6 +1028,8 @@ MonoBehaviour:
   enabledElevation: 0
   useCustomImage: 0
   customImage: {fileID: 0}
+  riverLineRenderer: {fileID: 3698344272903933456, guid: 8f34b1bef7469c34ea049fb586350e63,
+    type: 3}
   usePerlinNoise: 0
 --- !u!1 &331463089
 GameObject:
