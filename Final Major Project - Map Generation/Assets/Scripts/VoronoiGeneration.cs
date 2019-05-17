@@ -378,7 +378,7 @@ public class VoronoiGeneration : MonoBehaviour
                 List<int> borderVerts = HelperFunctions.findBorderVerts(trisList, vertBiomes, chunkMesh, BiomeType.land, BiomeType.water);
                 makeBorderVertsPink(borderVerts, chunkMesh);
 
-                //findCentreOfIsland(chunkMesh, vertBiomes, borderVerts, vertCons, trisList);
+                //MeshSearching.findCentreOfIsland(chunkMesh, vertBiomes, borderVerts, vertCons, trisList);
                 MeshSearching.findCentreOfIslandSimple(chunkMesh, vertBiomes, borderVerts, vertCons, trisList);
                 //print("just before define rivers");
                 //printArrayIfY(chunkMesh.vertices);
@@ -430,6 +430,16 @@ public class VoronoiGeneration : MonoBehaviour
                 allLandIndexs.Add(i);
             }
         }
+        //don't do this it just doesn't work find a new way to pick a default one 
+        //while(true) // probably a terrible idea. has the potential to be quicker than constructing a list that only has land borderverts 
+        //{
+        //    borderEdgeIndex = Random.Range(0, borderVerts.Count - 1);
+        //    if(allLandIndexs.Contains(borderEdgeIndex))
+        //    {
+        //        riverVertIndex.Add(borderEdgeIndex);
+        //        break;
+        //    }
+        //}
 
         for (int i = 0; i < allLandIndexs.Count; i++)
         {
@@ -542,6 +552,7 @@ public class VoronoiGeneration : MonoBehaviour
         GameObject lineRender = Instantiate(riverLineRenderer, riverVertPositions[0], Quaternion.identity);
         lineRender.GetComponent<LineRenderer>().positionCount = riverVertPositions.Count;
         lineRender.GetComponent<LineRenderer>().SetPositions(riverVertPositions.ToArray());
+        lineRender.transform.parent = transform;
         //pass to line renderer
     }
 
