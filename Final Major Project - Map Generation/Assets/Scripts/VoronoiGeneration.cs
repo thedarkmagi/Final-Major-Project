@@ -440,20 +440,23 @@ public class VoronoiGeneration : MonoBehaviour
         for (int j = 0; j < 40; j++)
         {
             float distance = float.MaxValue;
-            int index = 0;
+            int index = int.MaxValue;
             for (int i = 0; i < allLandIndexs.Count; i++)
             {
                 if (!riverVertIndex.Contains(allLandIndexs[i]))
                 {
-                    float temp = HelperFunctions.sqrDistance(mesh.vertices[allLandIndexs[i]], mesh.vertices[riverVertIndex.Last()]);
-                    if (temp < distance && temp > 0)
+                    if (HelperFunctions.hasALargerY(mesh.vertices[riverVertIndex.Last()], mesh.vertices[allLandIndexs[i]]))
                     {
-                        distance = temp;
-                        index = allLandIndexs[i];
+                        float temp = HelperFunctions.sqrDistance(mesh.vertices[allLandIndexs[i]], mesh.vertices[riverVertIndex.Last()]);
+                        if (temp < distance && temp > 0)
+                        {
+                            distance = temp;
+                            index = allLandIndexs[i];
+                        }
                     }
                 }
             }
-            //if(!riverVertIndex.Contains(index))
+            if(!riverVertIndex.Contains(index) && index != int.MaxValue)
                 riverVertIndex.Add(index);
         }
         print("riverVertIndex");

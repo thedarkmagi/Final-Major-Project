@@ -22,6 +22,18 @@ public static class HelperFunctions
         float result = ((tempTwo.x - tempOne.x) * (tempTwo.x - tempOne.x)) + ((tempTwo.y - tempOne.y) * (tempTwo.y - tempOne.y)) + ((tempTwo.z - tempOne.z) * (tempTwo.z - tempOne.z));
         return result;
     }
+
+    public static bool hasALargerY(Vector3 lastAdded, Vector3 possibleNewOne)
+    {
+        if(lastAdded.y>=possibleNewOne.y)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
     public static List<int> findBorderVerts(List<List<int>> triList, Dictionary<int, BiomeType> vertBiomes, Mesh mesh, BiomeType targetBiome, BiomeType secondTargetBiome)
     {
         List<int> borderVerts = new List<int>();
