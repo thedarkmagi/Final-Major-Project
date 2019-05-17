@@ -13,10 +13,13 @@ public static class HelperFunctions
         return result;
     }
 
-    public static float sqrDistance(Vector3 one, Vector3 two)
+    public static float sqrDistance(Vector3 One, Vector3 Two)
     {
         //float result = 0;
-        float result = ((two.x - one.x) * (two.x - one.x)) + ((two.y - one.y) * (two.y - one.y)) + ((two.z - one.z) * (two.z - one.z));
+        Vector3 tempOne = One;
+        Vector3 tempTwo = Two;
+
+        float result = ((tempTwo.x - tempOne.x) * (tempTwo.x - tempOne.x)) + ((tempTwo.y - tempOne.y) * (tempTwo.y - tempOne.y)) + ((tempTwo.z - tempOne.z) * (tempTwo.z - tempOne.z));
         return result;
     }
     public static List<int> findBorderVerts(List<List<int>> triList, Dictionary<int, BiomeType> vertBiomes, Mesh mesh, BiomeType targetBiome, BiomeType secondTargetBiome)

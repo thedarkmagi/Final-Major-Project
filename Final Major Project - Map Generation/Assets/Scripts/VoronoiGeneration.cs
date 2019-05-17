@@ -430,93 +430,111 @@ public class VoronoiGeneration : MonoBehaviour
                 allLandIndexs.Add(i);
             }
         }
+
+        for (int i = 0; i < allLandIndexs.Count; i++)
+        {
+            //print(mesh.vertices[allLandIndexs[i]]);
+        }
+
+        // somewhere in this loop is killing the Y of mesh verts apparently? 
         for (int j = 0; j < 40; j++)
         {
             float distance = float.MaxValue;
             int index = 0;
             for (int i = 0; i < allLandIndexs.Count; i++)
             {
-                float temp = HelperFunctions.sqrDistance(mesh.vertices[allLandIndexs[i]], mesh.vertices[riverVertIndex[riverVertIndex.Count - 1]]);
-                if (temp < distance)
+                if (!riverVertIndex.Contains(allLandIndexs[i]))
                 {
-                    distance = temp;
-                    index = i;
+                    float temp = HelperFunctions.sqrDistance(mesh.vertices[allLandIndexs[i]], mesh.vertices[riverVertIndex.Last()]);
+                    if (temp < distance && temp > 0)
+                    {
+                        distance = temp;
+                        index = allLandIndexs[i];
+                    }
                 }
             }
-            riverVertIndex.Add(index);
+            //if(!riverVertIndex.Contains(index))
+                riverVertIndex.Add(index);
         }
-        #region ITERATAIONS
-        for (int iterations = 0; iterations < maxIterations; iterations++)
+        print("riverVertIndex");
+        for (int i = 0; i < riverVertIndex.Count; i++)
         {
-            for (int i = 0; i < triList.Count; i++)
-            {
-                if (triList[i].Contains(riverVertIndex[riverVertIndex.Count - 1]))
-                {
-                    List<int> possiblePath = new List<int>();
-                    for (int j = 0; j < triList[i].Count; j++)
-                    {
-                        if (!riverVertIndex.Contains(triList[i][j]))
-                        //if (triList[i][j] != riverVertIndex[riverVertIndex.Count-1])
-                        {
-                            if (vertBiomes[triList[i][j]] == BiomeType.land)
-                            {
-                                possiblePath.Add(triList[i][j]);
-                                print("does this happen adding to possible Path");
-                            }
-                            else
-                            {
-                                List<int> samePlaceVerts = new List<int>();
-                                samePlaceVerts.AddRange(MeshSearching.findVertsOfTheSamePosition(vertCons, riverVertIndex[riverVertIndex.Count - 1]));
-                                int errorCheck = checkIfIndexHasLandNextToIt(samePlaceVerts, vertCons, vertBiomes, triList);
-                                if (errorCheck != int.MaxValue)
-                                {
-                                    print("did this work at all???");
-                                    possiblePath.Add(errorCheck);
-                                }
-                            }
-                        }
-                    }
-                    //print("loop number: " + iterations+ " TriList Position: "+ i);
-                    //printList(possiblePath);
-                    if (possiblePath.Count >= 2) // should check if any of these are higher than the current vert cuz if they ain't we don't want it
-                    {
-                        print(vertBiomes[riverVertIndex[riverVertIndex.Count - 1]] + " coming from this point and going to this one" + vertBiomes[possiblePath[1]]); // these were just 0 WHY?
-                        //if (mesh.vertices[riverVertIndex[riverVertIndex.Count - 1]].y < mesh.vertices[possiblePath[1]].y)
-                        //{
-                            if (mesh.vertices[possiblePath[0]].y > mesh.vertices[possiblePath[1]].y)
-                            {
-                                riverVertIndex.Add(possiblePath[0]);
-                                //break;
-                            }
-                            else
-                            {
-                                riverVertIndex.Add(possiblePath[1]);
-                                //break;
-                            }
-                        //}
-                    }
-                    else if (possiblePath.Count > 1)
-                    {
-                        riverVertIndex.Add(possiblePath[0]);
-                    }
-                    possiblePath.Clear();
-                }
-            }
-            riverVertIndex.AddRange(MeshSearching.findVertsOfTheSamePosition(vertCons, riverVertIndex[riverVertIndex.Count - 1]));
-            riverVertIndex = riverVertIndex.Distinct().ToList();
+           //print(mesh.vertices[riverVertIndex[i]]);
         }
+
+        #region ITERATAIONS
+        //for (int iterations = 0; iterations < maxIterations; iterations++)
+        //{
+        //    for (int i = 0; i < triList.Count; i++)
+        //    {
+        //        if (triList[i].Contains(riverVertIndex[riverVertIndex.Count - 1]))
+        //        {
+        //            List<int> possiblePath = new List<int>();
+        //            for (int j = 0; j < triList[i].Count; j++)
+        //            {
+        //                if (!riverVertIndex.Contains(triList[i][j]))
+        //                //if (triList[i][j] != riverVertIndex[riverVertIndex.Count-1])
+        //                {
+        //                    if (vertBiomes[triList[i][j]] == BiomeType.land)
+        //                    {
+        //                        possiblePath.Add(triList[i][j]);
+        //                        print("does this happen adding to possible Path");
+        //                    }
+        //                    else
+        //                    {
+        //                        List<int> samePlaceVerts = new List<int>();
+        //                        samePlaceVerts.AddRange(MeshSearching.findVertsOfTheSamePosition(vertCons, riverVertIndex[riverVertIndex.Count - 1]));
+        //                        int errorCheck = checkIfIndexHasLandNextToIt(samePlaceVerts, vertCons, vertBiomes, triList);
+        //                        if (errorCheck != int.MaxValue)
+        //                        {
+        //                            print("did this work at all???");
+        //                            possiblePath.Add(errorCheck);
+        //                        }
+        //                    }
+        //                }
+        //            }
+        //            //print("loop number: " + iterations+ " TriList Position: "+ i);
+        //            //printList(possiblePath);
+        //            if (possiblePath.Count >= 2) // should check if any of these are higher than the current vert cuz if they ain't we don't want it
+        //            {
+        //                print(vertBiomes[riverVertIndex[riverVertIndex.Count - 1]] + " coming from this point and going to this one" + vertBiomes[possiblePath[1]]); // these were just 0 WHY?
+        //                //if (mesh.vertices[riverVertIndex[riverVertIndex.Count - 1]].y < mesh.vertices[possiblePath[1]].y)
+        //                //{
+        //                    if (mesh.vertices[possiblePath[0]].y > mesh.vertices[possiblePath[1]].y)
+        //                    {
+        //                        riverVertIndex.Add(possiblePath[0]);
+        //                        //break;
+        //                    }
+        //                    else
+        //                    {
+        //                        riverVertIndex.Add(possiblePath[1]);
+        //                        //break;
+        //                    }
+        //                //}
+        //            }
+        //            else if (possiblePath.Count > 1)
+        //            {
+        //                riverVertIndex.Add(possiblePath[0]);
+        //            }
+        //            possiblePath.Clear();
+        //        }
+        //    }
+        //    riverVertIndex.AddRange(MeshSearching.findVertsOfTheSamePosition(vertCons, riverVertIndex[riverVertIndex.Count - 1]));
+        //    riverVertIndex = riverVertIndex.Distinct().ToList();
+        //}
         #endregion
 
 
-
+        //riverVertIndex = riverVertIndex.Distinct().ToList();
         //store the list of points
         List<Vector3> riverVertPositions = new List<Vector3>();
         for (int i = 0; i < riverVertIndex.Count; i++)
         {
             riverVertPositions.Add(mesh.vertices[riverVertIndex[i]]);
-            //print(mesh.vertices[riverVertIndex[i]]);
+            //print("Straight from Mesh " + mesh.vertices[riverVertIndex[i]]);
+            //print("Straight from RiverVertPositions " + riverVertPositions.Last());
         }
-        riverVertPositions = riverVertPositions.Distinct().ToList();
+        //riverVertPositions = riverVertPositions.Distinct().ToList();
 
         GameObject lineRender = Instantiate(riverLineRenderer, riverVertPositions[0], Quaternion.identity);
         lineRender.GetComponent<LineRenderer>().positionCount = riverVertPositions.Count;
@@ -594,14 +612,6 @@ public class VoronoiGeneration : MonoBehaviour
     }
     #endregion
 
-    #region Mesh searching 
-
-    #endregion
-
-    #region helper Functions
-
-
-    #endregion
     // draw lines
     public void OnDrawGizmos()
     {
