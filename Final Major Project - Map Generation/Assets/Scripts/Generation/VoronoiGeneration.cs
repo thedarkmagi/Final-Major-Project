@@ -34,6 +34,7 @@ public class VoronoiGeneration : MonoBehaviour
     private int selectedImagePoolIndex;
     public bool useImagePool;
     public bool enabledElevation;
+    public bool enableSlowElevationGeneration;
     public bool useCustomImage;
     public Texture2D customImage;
 
@@ -315,14 +316,17 @@ public class VoronoiGeneration : MonoBehaviour
                 List<int> borderVerts = HelperFunctions.findBorderVerts(trisList, vertBiomes, chunkMesh, BiomeType.land, BiomeType.water);
                 makeBorderVertsPink(borderVerts, chunkMesh);
 
-                //MeshSearching.findCentreOfIsland(chunkMesh, vertBiomes, borderVerts, vertCons, trisList);
-                MeshSearching.findCentreOfIslandSimple(chunkMesh, vertBiomes, borderVerts, vertCons, trisList);
+                if(enableSlowElevationGeneration)
+                    MeshSearching.findCentreOfIsland(chunkMesh, vertBiomes, borderVerts, vertCons, trisList);
+                else
+                    MeshSearching.findCentreOfIslandSimple(chunkMesh, vertBiomes, borderVerts, vertCons, trisList);
                 //print("just before define rivers");
                 //printArrayIfY(chunkMesh.vertices);
                 int nRiversMax = Random.Range((int)nRivers.x, (int)nRivers.y);
                 for (int i = (int)nRivers.x; i < nRiversMax; i++)
+                //for (int i = 0; i < borderVerts.Count; i++)
                 {
-                    defineRivers(chunkMesh, vertBiomes, borderVerts, vertCons, trisList);
+                    defineRivers(chunkMesh, vertBiomes, borderVerts, vertCons, trisList, i);
                 }
             }
             //GameObject chunk = Instantiate<GameObject>(chunkPrefab, transform.position, transform.rotation);
@@ -351,7 +355,7 @@ public class VoronoiGeneration : MonoBehaviour
         mesh.colors = newColours;
     }
 
-    public void defineRivers(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, MeshSearching.VertexConnection[] vertCons, List<List<int>> triList)
+    public void defineRivers(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, MeshSearching.VertexConnection[] vertCons, List<List<int>> triList, int selectedIndex)
     {
         //find a possible river
         //print("in define rivers");
@@ -360,8 +364,9 @@ public class VoronoiGeneration : MonoBehaviour
         //take border 
         //loop through triangles? pick heigher of 2 other verts?
         int borderEdgeIndex = Random.Range(0, borderVerts.Count-1);
+        //borderEdgeIndex = selectedIndex;
         List<int> riverVertIndex = new List<int>();
-        riverVertIndex.Add(borderEdgeIndex);
+        riverVertIndex.Add(borderVerts[borderEdgeIndex]);
         int maxIterations = 7;
         List<int> allLandIndexs = new List<int>();
         for (int i = 0; i < vertBiomes.Count; i++)
