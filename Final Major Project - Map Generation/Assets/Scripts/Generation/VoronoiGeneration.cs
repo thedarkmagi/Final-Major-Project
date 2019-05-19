@@ -323,10 +323,17 @@ public class VoronoiGeneration : MonoBehaviour
                 //print("just before define rivers");
                 //printArrayIfY(chunkMesh.vertices);
                 int nRiversMax = Random.Range((int)nRivers.x, (int)nRivers.y);
+                int maxIterationsOfRiverSearch = 40;
+                int maxIter = maxIterationsOfRiverSearch;
                 for (int i = (int)nRivers.x; i < nRiversMax; i++)
                 //for (int i = 0; i < borderVerts.Count; i++)
                 {
-                    defineRivers(chunkMesh, vertBiomes, borderVerts, vertCons, trisList, i);
+                    defineRivers(chunkMesh, vertBiomes, borderVerts, vertCons, trisList, maxIterationsOfRiverSearch);
+                    maxIterationsOfRiverSearch -= 5;
+                    if(maxIterationsOfRiverSearch<=0)
+                    {
+                        maxIterationsOfRiverSearch = maxIter;
+                    }
                 }
             }
             //GameObject chunk = Instantiate<GameObject>(chunkPrefab, transform.position, transform.rotation);
@@ -355,7 +362,7 @@ public class VoronoiGeneration : MonoBehaviour
         mesh.colors = newColours;
     }
 
-    public void defineRivers(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, MeshSearching.VertexConnection[] vertCons, List<List<int>> triList, int selectedIndex)
+    public void defineRivers(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, MeshSearching.VertexConnection[] vertCons, List<List<int>> triList, int maxIterations)
     {
         //find a possible river
         //print("in define rivers");
@@ -367,7 +374,7 @@ public class VoronoiGeneration : MonoBehaviour
         //borderEdgeIndex = selectedIndex;
         List<int> riverVertIndex = new List<int>();
         riverVertIndex.Add(borderVerts[borderEdgeIndex]);
-        int maxIterations = 7;
+        maxIterations = 7;
         List<int> allLandIndexs = new List<int>();
         for (int i = 0; i < vertBiomes.Count; i++)
         {
@@ -393,7 +400,7 @@ public class VoronoiGeneration : MonoBehaviour
         }
 
         // somewhere in this loop is killing the Y of mesh verts apparently? 
-        for (int j = 0; j < 40; j++)
+        for (int j = 0; j < maxIterations; j++)
         {
             float distance = float.MaxValue;
             int index = int.MaxValue;
