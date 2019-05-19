@@ -43,6 +43,8 @@ public class VoronoiGeneration : MonoBehaviour
     public bool usePerlinNoise;
     [MinMax(0,50)]
     public Vector2 nRivers;
+    private bool flatIsland;
+
     IEnumerator delayStart()
     {
         print("Starting");
@@ -72,21 +74,26 @@ public class VoronoiGeneration : MonoBehaviour
 
         nRivers.x = Mathf.FloorToInt(nRivers.x);
         nRivers.y = Mathf.FloorToInt(nRivers.y);
+
+        flatIsland = !enabledElevation;
+
     }
 
     public void StartGeneration()
     {
 
-        print("Starting");
+        //print("Starting");
 
-        for (int i = 0; i < chunksPerEdge; i++)
-        {
-            for (int j = 0; j < chunksPerEdge; j++)
-            {
-                generateMesh(xsize * i, ysize * j);
-            }
-        }
-        print("finishing");
+        //for (int i = 0; i < chunksPerEdge; i++)
+        //{
+        //    for (int j = 0; j < chunksPerEdge; j++)
+        //    {
+        //        generateMesh(xsize * i, ysize * j);
+        //    }
+        //}
+        //print("finishing");
+
+        StartCoroutine(delayStart());
     }
     // Start is called before the first frame update
     void Start()
@@ -329,7 +336,8 @@ public class VoronoiGeneration : MonoBehaviour
                     for (int i = (int)nRivers.x; i < nRiversMax; i++)
                     //for (int i = 0; i < borderVerts.Count; i++)
                     {
-                        defineRivers(chunkMesh, vertBiomes, borderVerts, vertCons, trisList, maxIterationsOfRiverSearch);
+                        //defineRivers(chunkMesh, vertBiomes, borderVerts, vertCons, trisList, maxIterationsOfRiverSearch);
+                        StartCoroutine( defineRiversDownwards(chunkMesh, vertBiomes, borderVerts, vertCons, trisList, maxIterationsOfRiverSearch));
                         maxIterationsOfRiverSearch -= 5;
                         if (maxIterationsOfRiverSearch <= 0)
                         {
@@ -373,10 +381,9 @@ public class VoronoiGeneration : MonoBehaviour
         //take border 
         //loop through triangles? pick heigher of 2 other verts?
         int borderEdgeIndex = Random.Range(0, borderVerts.Count-1);
-        //borderEdgeIndex = selectedIndex;
         List<int> riverVertIndex = new List<int>();
         riverVertIndex.Add(borderVerts[borderEdgeIndex]);
-        maxIterations = 7;
+
         List<int> allLandIndexs = new List<int>();
         for (int i = 0; i < vertBiomes.Count; i++)
         {
@@ -385,23 +392,7 @@ public class VoronoiGeneration : MonoBehaviour
                 allLandIndexs.Add(i);
             }
         }
-        //don't do this it just doesn't work find a new way to pick a default one 
-        //while(true) // probably a terrible idea. has the potential to be quicker than constructing a list that only has land borderverts 
-        //{
-        //    borderEdgeIndex = Random.Range(0, borderVerts.Count - 1);
-        //    if(allLandIndexs.Contains(borderEdgeIndex))
-        //    {
-        //        riverVertIndex.Add(borderEdgeIndex);
-        //        break;
-        //    }
-        //}
 
-        for (int i = 0; i < allLandIndexs.Count; i++)
-        {
-            //print(mesh.vertices[allLandIndexs[i]]);
-        }
-
-        // somewhere in this loop is killing the Y of mesh verts apparently? 
         for (int j = 0; j < maxIterations; j++)
         {
             float distance = float.MaxValue;
@@ -410,7 +401,7 @@ public class VoronoiGeneration : MonoBehaviour
             {
                 if (!riverVertIndex.Contains(allLandIndexs[i]))
                 {
-                    if (HelperFunctions.hasALargerY(mesh.vertices[riverVertIndex.Last()], mesh.vertices[allLandIndexs[i]]))
+                    if (HelperFunctions.hasALargerY(mesh.vertices[riverVertIndex.Last()], mesh.vertices[allLandIndexs[i]])  || flatIsland)
                     {
                         float temp = HelperFunctions.sqrDistance(mesh.vertices[allLandIndexs[i]], mesh.vertices[riverVertIndex.Last()]);
                         if (temp < distance && temp > 0)
@@ -421,13 +412,8 @@ public class VoronoiGeneration : MonoBehaviour
                     }
                 }
             }
-            if(!riverVertIndex.Contains(index) && index != int.MaxValue)
+            if(!riverVertIndex.Contains(index) && index != int.MaxValue) // this only checks index so duplicates could be coming from same position different vert
                 riverVertIndex.Add(index);
-        }
-        print("riverVertIndex");
-        for (int i = 0; i < riverVertIndex.Count; i++)
-        {
-           //print(mesh.vertices[riverVertIndex[i]]);
         }
 
         #region ITERATAIONS
@@ -492,18 +478,81 @@ public class VoronoiGeneration : MonoBehaviour
         //}
         #endregion
 
-
-        //riverVertIndex = riverVertIndex.Distinct().ToList();
         //store the list of points
         List<Vector3> riverVertPositions = new List<Vector3>();
         for (int i = 0; i < riverVertIndex.Count; i++)
         {
             riverVertPositions.Add(mesh.vertices[riverVertIndex[i]]);
-            //print("Straight from Mesh " + mesh.vertices[riverVertIndex[i]]);
-            //print("Straight from RiverVertPositions " + riverVertPositions.Last());
         }
-        //riverVertPositions = riverVertPositions.Distinct().ToList();
+        GameObject lineRender = Instantiate(riverLineRenderer, riverVertPositions[0], Quaternion.identity);
+        lineRender.GetComponent<LineRenderer>().positionCount = riverVertPositions.Count;
+        lineRender.GetComponent<LineRenderer>().SetPositions(riverVertPositions.ToArray());
+        lineRender.transform.parent = transform;
+        //pass to line renderer
+    }
 
+    public IEnumerator defineRiversDownwards(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, MeshSearching.VertexConnection[] vertCons, List<List<int>> triList, int maxIterations)
+    {
+        //find a possible river
+        //print("in define rivers");
+        //printArrayIfY(mesh.vertices);
+        yield return new WaitForSeconds(0);
+        //take border 
+        //loop through triangles? pick heigher of 2 other verts?
+        int borderEdgeIndex = borderVerts[Random.Range(0, borderVerts.Count - 1)];
+        List<int> riverVertIndex = new List<int>();
+        //riverVertIndex.Add(borderVerts[borderEdgeIndex]);
+
+        //this should probably be defined in a function above this so it's not looped. as this data isn't changing
+        List<int> allLandIndexs = new List<int>();
+        for (int i = 0; i < vertBiomes.Count; i++)
+        {
+            if (vertBiomes[i] == BiomeType.land)
+            {
+                allLandIndexs.Add(i);
+            }
+        }
+
+        int selectedLandIndex = allLandIndexs[Random.Range(0, allLandIndexs.Count)];
+        riverVertIndex.Add(selectedLandIndex);
+
+        for (int j = 0; j < maxIterations; j++)
+        {
+            float distance = float.MaxValue;
+            float distanceToTargetPoint = float.MaxValue;
+            int index = int.MaxValue;
+            for (int i = 0; i < allLandIndexs.Count; i++)
+            {
+                if (!riverVertIndex.Contains(allLandIndexs[i]))
+                {
+                    if (HelperFunctions.hasASmallerY(mesh.vertices[riverVertIndex.Last()], mesh.vertices[allLandIndexs[i]]) || flatIsland)
+                    {
+                        float distanceFromLastPoint = HelperFunctions.sqrDistance(mesh.vertices[allLandIndexs[i]], mesh.vertices[riverVertIndex.Last()]);
+                        float possibleTargetDistance = HelperFunctions.sqrDistance(mesh.vertices[allLandIndexs[i]], mesh.vertices[borderEdgeIndex]);
+                        if (distanceFromLastPoint < distance && possibleTargetDistance < distanceToTargetPoint && distanceFromLastPoint > 0)
+                        {
+                            distance = distanceFromLastPoint;
+                            distanceToTargetPoint = possibleTargetDistance;
+                            index = allLandIndexs[i];
+                        }
+                        if(possibleTargetDistance<=0)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+            if (!riverVertIndex.Contains(index) && index != int.MaxValue) // this only checks index so duplicates could be coming from same position different vert
+                riverVertIndex.Add(index);
+        }
+
+
+        //store the list of points
+        List<Vector3> riverVertPositions = new List<Vector3>();
+        for (int i = 0; i < riverVertIndex.Count; i++)
+        {
+            riverVertPositions.Add(mesh.vertices[riverVertIndex[i]]);
+        }
         GameObject lineRender = Instantiate(riverLineRenderer, riverVertPositions[0], Quaternion.identity);
         lineRender.GetComponent<LineRenderer>().positionCount = riverVertPositions.Count;
         lineRender.GetComponent<LineRenderer>().SetPositions(riverVertPositions.ToArray());

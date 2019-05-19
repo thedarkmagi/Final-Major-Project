@@ -34,6 +34,17 @@ public static class HelperFunctions
             return true;
         }
     }
+    public static bool hasASmallerY(Vector3 lastAdded, Vector3 possibleNewOne)
+    {
+        if (lastAdded.y <= possibleNewOne.y)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
     public static List<int> findBorderVerts(List<List<int>> triList, Dictionary<int, BiomeType> vertBiomes, Mesh mesh, BiomeType targetBiome, BiomeType secondTargetBiome)
     {
         List<int> borderVerts = new List<int>();
