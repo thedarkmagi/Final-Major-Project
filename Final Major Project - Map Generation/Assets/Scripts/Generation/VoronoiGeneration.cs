@@ -496,6 +496,7 @@ public class VoronoiGeneration : MonoBehaviour
         //find a possible river
         //print("in define rivers");
         //printArrayIfY(mesh.vertices);
+        print("River Started");
         yield return new WaitForSeconds(0);
         //take border 
         //loop through triangles? pick heigher of 2 other verts?
@@ -529,16 +530,18 @@ public class VoronoiGeneration : MonoBehaviour
                     {
                         float distanceFromLastPoint = HelperFunctions.sqrDistance(mesh.vertices[allLandIndexs[i]], mesh.vertices[riverVertIndex.Last()]);
                         float possibleTargetDistance = HelperFunctions.sqrDistance(mesh.vertices[allLandIndexs[i]], mesh.vertices[borderEdgeIndex]);
-                        if (distanceFromLastPoint < distance && possibleTargetDistance < distanceToTargetPoint && distanceFromLastPoint > 0)
+                        float distanceFromLastPointToTarget = HelperFunctions.sqrDistance(mesh.vertices[riverVertIndex.Last()], mesh.vertices[borderEdgeIndex]);
+                        //problem is here, as it has to both be closer in 2 unrelated distances. which isn't always possible. 
+                        if (distanceFromLastPoint < distance && possibleTargetDistance < distanceFromLastPointToTarget && distanceFromLastPoint > 0)
                         {
                             distance = distanceFromLastPoint;
                             distanceToTargetPoint = possibleTargetDistance;
                             index = allLandIndexs[i];
                         }
-                        if(possibleTargetDistance<=0)
-                        {
-                            break;
-                        }
+                        //if(possibleTargetDistance<=0)
+                        //{
+                        //    break;
+                        //}
                     }
                 }
             }
@@ -558,6 +561,7 @@ public class VoronoiGeneration : MonoBehaviour
         lineRender.GetComponent<LineRenderer>().SetPositions(riverVertPositions.ToArray());
         lineRender.transform.parent = transform;
         //pass to line renderer
+        print("River Finished");
     }
 
     public int checkIfIndexHasLandNextToIt(List<int> points, MeshSearching.VertexConnection[] vertCons, Dictionary<int, BiomeType> vertBiomes, List<List<int>> triList)
