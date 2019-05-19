@@ -35,12 +35,13 @@ public class VoronoiGeneration : MonoBehaviour
     public bool useImagePool;
     public bool enabledElevation;
     public bool enableSlowElevationGeneration;
+    public bool enableRivers;
     public bool useCustomImage;
     public Texture2D customImage;
 
     public GameObject riverLineRenderer;
     public bool usePerlinNoise;
-    [MinMax(0,10)]
+    [MinMax(0,50)]
     public Vector2 nRivers;
     IEnumerator delayStart()
     {
@@ -305,34 +306,35 @@ public class VoronoiGeneration : MonoBehaviour
             chunkMesh.normals = normals.ToArray();
             chunkMesh.colors = vertColors.ToArray();
 
-            if (enabledElevation)
+            if (enabledElevation || enableRivers)
             {
                 Dictionary<int, BiomeType> vertBiomes = new Dictionary<int, BiomeType>();
-                //printBiomeDictionary(vertBiomes);
+                vertBiomes = MeshSearching.setVertBiomes(chunkMesh, islandHeight);
                 MeshSearching.VertexConnection[] vertCons = MeshSearching.FindAllOverLappingVert(chunkMesh);
-                //print(vertCons.Length);
-                vertBiomes = MeshSearching.setVertBiomes(chunkMesh,islandHeight);
-                //printBiomeDictionary(vertBiomes);
                 List<int> borderVerts = HelperFunctions.findBorderVerts(trisList, vertBiomes, chunkMesh, BiomeType.land, BiomeType.water);
                 makeBorderVertsPink(borderVerts, chunkMesh);
 
-                if(enableSlowElevationGeneration)
-                    MeshSearching.findCentreOfIsland(chunkMesh, vertBiomes, borderVerts, vertCons, trisList);
-                else
-                    MeshSearching.findCentreOfIslandSimple(chunkMesh, vertBiomes, borderVerts, vertCons, trisList);
-                //print("just before define rivers");
-                //printArrayIfY(chunkMesh.vertices);
-                int nRiversMax = Random.Range((int)nRivers.x, (int)nRivers.y);
-                int maxIterationsOfRiverSearch = 40;
-                int maxIter = maxIterationsOfRiverSearch;
-                for (int i = (int)nRivers.x; i < nRiversMax; i++)
-                //for (int i = 0; i < borderVerts.Count; i++)
+                if (enabledElevation)
                 {
-                    defineRivers(chunkMesh, vertBiomes, borderVerts, vertCons, trisList, maxIterationsOfRiverSearch);
-                    maxIterationsOfRiverSearch -= 5;
-                    if(maxIterationsOfRiverSearch<=0)
+                    if (enableSlowElevationGeneration)
+                        MeshSearching.findCentreOfIsland(chunkMesh, vertBiomes, borderVerts, vertCons, trisList);
+                    else
+                        MeshSearching.findCentreOfIslandSimple(chunkMesh, vertBiomes, borderVerts, vertCons, trisList);
+                }
+                if(enableRivers)
+                {
+                    int nRiversMax = Random.Range((int)nRivers.x, (int)nRivers.y);
+                    int maxIterationsOfRiverSearch = 40;
+                    int maxIter = maxIterationsOfRiverSearch;
+                    for (int i = (int)nRivers.x; i < nRiversMax; i++)
+                    //for (int i = 0; i < borderVerts.Count; i++)
                     {
-                        maxIterationsOfRiverSearch = maxIter;
+                        defineRivers(chunkMesh, vertBiomes, borderVerts, vertCons, trisList, maxIterationsOfRiverSearch);
+                        maxIterationsOfRiverSearch -= 5;
+                        if (maxIterationsOfRiverSearch <= 0)
+                        {
+                            maxIterationsOfRiverSearch = maxIter;
+                        }
                     }
                 }
             }
