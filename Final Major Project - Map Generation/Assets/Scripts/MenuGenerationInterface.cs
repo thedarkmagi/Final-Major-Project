@@ -17,6 +17,8 @@ public class MenuGenerationInterface : MonoBehaviour
         public bool useElevationSystem;
         public bool usePerlin;
         public bool useCustomImage;
+        public bool useElevationSlow;
+        public bool useRivers;
     }
     public struct chunkSize
     {
@@ -48,13 +50,7 @@ public class MenuGenerationInterface : MonoBehaviour
     void Start()
     {
         generator = FindObjectOfType<VoronoiGeneration>();
-        generationSettings.islandThreshHold = 0.5f;
-        generationSettings.useImagePool = true;
-        generationSettings.useElevationSystem = false;
-        generationSettings.usePerlin = false;
-        generationSettings.nChunks = 1;
-        generationSettings.selectedImagePoolIndex = 0;
-        selectedSizeIndex = 0;
+        resetValues();
         #region size values initialtion
         small.nPointsInputted = 1000;
         small.Xsize = 250;
@@ -84,6 +80,8 @@ public class MenuGenerationInterface : MonoBehaviour
         generationSettings.islandThreshHold = 0.5f;
         generationSettings.useImagePool = true;
         generationSettings.useElevationSystem = false;
+        generationSettings.useElevationSlow = false;
+        generationSettings.useRivers = false;
         generationSettings.usePerlin = false;
         generationSettings.useCustomImage = false;
         generationSettings.nChunks = 1;
@@ -123,6 +121,14 @@ public class MenuGenerationInterface : MonoBehaviour
     public void setUseElevation(bool input)
     {
         generationSettings.useElevationSystem = input;
+    }
+    public void setUseElevationSlow(bool input)
+    {
+        generationSettings.useElevationSlow = input;
+    }
+    public void setUseRivers(bool input)
+    {
+        generationSettings.useRivers = input;
     }
     public void setUsePerlin(bool input)
     {

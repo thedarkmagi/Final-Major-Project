@@ -71,6 +71,8 @@ public class VoronoiGeneration : MonoBehaviour
         selectedImagePoolIndex = settings.selectedImagePoolIndex;
         usePerlinNoise = settings.usePerlin;
         useCustomImage = settings.useCustomImage;
+        enableSlowElevationGeneration = settings.useElevationSlow;
+        enableRivers = settings.useRivers;
 
         nRivers.x = Mathf.FloorToInt(nRivers.x);
         nRivers.y = Mathf.FloorToInt(nRivers.y);
@@ -84,16 +86,16 @@ public class VoronoiGeneration : MonoBehaviour
 
         //print("Starting");
 
-        //for (int i = 0; i < chunksPerEdge; i++)
-        //{
-        //    for (int j = 0; j < chunksPerEdge; j++)
-        //    {
-        //        generateMesh(xsize * i, ysize * j);
-        //    }
-        //}
+        for (int i = 0; i < chunksPerEdge; i++)
+        {
+            for (int j = 0; j < chunksPerEdge; j++)
+            {
+                generateMesh(xsize * i, ysize * j);
+            }
+        }
         //print("finishing");
 
-        StartCoroutine(delayStart());
+        //StartCoroutine(delayStart());
     }
     // Start is called before the first frame update
     void Start()
@@ -336,8 +338,8 @@ public class VoronoiGeneration : MonoBehaviour
                     for (int i = (int)nRivers.x; i < nRiversMax; i++)
                     //for (int i = 0; i < borderVerts.Count; i++)
                     {
-                        //defineRivers(chunkMesh, vertBiomes, borderVerts, vertCons, trisList, maxIterationsOfRiverSearch);
-                        StartCoroutine( defineRiversDownwards(chunkMesh, vertBiomes, borderVerts, vertCons, trisList, maxIterationsOfRiverSearch));
+                        defineRivers(chunkMesh, vertBiomes, borderVerts, vertCons, trisList, maxIterationsOfRiverSearch);
+                        //defineRiversDownwards(chunkMesh, vertBiomes, borderVerts, vertCons, trisList, maxIterationsOfRiverSearch);
                         maxIterationsOfRiverSearch -= 5;
                         if (maxIterationsOfRiverSearch <= 0)
                         {
@@ -491,13 +493,13 @@ public class VoronoiGeneration : MonoBehaviour
         //pass to line renderer
     }
 
-    public IEnumerator defineRiversDownwards(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, MeshSearching.VertexConnection[] vertCons, List<List<int>> triList, int maxIterations)
+    public void defineRiversDownwards(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, MeshSearching.VertexConnection[] vertCons, List<List<int>> triList, int maxIterations)
     {
         //find a possible river
         //print("in define rivers");
         //printArrayIfY(mesh.vertices);
         print("River Started");
-        yield return new WaitForSeconds(0);
+        //yield return new WaitForSeconds(0);
         //take border 
         //loop through triangles? pick heigher of 2 other verts?
         int borderEdgeIndex = borderVerts[Random.Range(0, borderVerts.Count - 1)];
