@@ -22,6 +22,15 @@ public static class HelperFunctions
         float result = ((tempTwo.x - tempOne.x) * (tempTwo.x - tempOne.x)) + ((tempTwo.y - tempOne.y) * (tempTwo.y - tempOne.y)) + ((tempTwo.z - tempOne.z) * (tempTwo.z - tempOne.z));
         return result;
     }
+    public static float sqrDistanceWithoutY(Vector3 One, Vector3 Two)
+    {
+        //float result = 0;
+        Vector3 tempOne = One;
+        Vector3 tempTwo = Two;
+
+        float result = ((tempTwo.x - tempOne.x) * (tempTwo.x - tempOne.x)) + ((tempTwo.z - tempOne.z) * (tempTwo.z - tempOne.z));
+        return result;
+    }
 
     public static bool hasALargerY(Vector3 lastAdded, Vector3 possibleNewOne)
     {
@@ -36,13 +45,13 @@ public static class HelperFunctions
     }
     public static bool hasASmallerY(Vector3 lastAdded, Vector3 possibleNewOne)
     {
-        if (lastAdded.y <= possibleNewOne.y)
+        if (lastAdded.y > possibleNewOne.y)
         {
-            return false;
+            return true;
         }
         else
         {
-            return true;
+            return false;
         }
     }
     public static List<int> findBorderVerts(List<List<int>> triList, Dictionary<int, BiomeType> vertBiomes, Mesh mesh, BiomeType targetBiome, BiomeType secondTargetBiome)

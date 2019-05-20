@@ -6,6 +6,9 @@ using TriangleNet.Topology;
 using System.Linq;
 public static class MeshSearching 
 {
+    //this was 100 earlier
+    private const int mounatinYMod = 30;
+
     public static bool findVertIndexOfAdjenctVerts(Mesh mesh, int vertIndex, List<List<int>> triList, Dictionary<int, BiomeType> vertBiomes, BiomeType targetBiome, BiomeType secondTargetBiome)
     {
         List<int> adjecentVertIndexs = new List<int>();
@@ -119,16 +122,27 @@ public static class MeshSearching
         //        }
         //    }
         //}
-        do
-        {
-            selectedIndex = Random.Range(0, mesh.vertices.Length);
-            if (!borderVerts.Contains(selectedIndex) && vertBiomes[selectedIndex] == BiomeType.land)
-                break;
-        }
-        while (borderVerts.Contains(selectedIndex) && vertBiomes[selectedIndex] != BiomeType.land);
-        //selectedIndex = mesh.vertices.Length / 2;
+        //do
+        //{
+        //    selectedIndex = Random.Range(0, mesh.vertices.Length);
+        //    if (!borderVerts.Contains(selectedIndex) && vertBiomes[selectedIndex] == BiomeType.land)
+        //        break;
+        //}
+        //while (borderVerts.Contains(selectedIndex) && vertBiomes[selectedIndex] != BiomeType.land);
 
-        mesh.vertices = updateVertPositionsFromList(findVertsOfTheSamePosition(vertCons, selectedIndex), mesh, 0, 100, 0);
+        List<int> allLandIndexs = new List<int>();
+        for (int i = 0; i < vertBiomes.Count; i++)
+        {
+            if (vertBiomes[i] == BiomeType.land)
+            {
+                allLandIndexs.Add(i);
+            }
+        }
+        
+        
+        //selectedIndex = mesh.vertices.Length / 2;
+        selectedIndex = Random.Range(0, allLandIndexs.Count - 1);
+        mesh.vertices = updateVertPositionsFromList(findVertsOfTheSamePosition(vertCons, selectedIndex), mesh, 0, mounatinYMod, 0);
         //updateElevationOfMap(mesh, vertBiomes, borderVerts, vertCons, triList, selectedIndex);
         mesh.vertices = updateElevationSimple(mesh, vertBiomes, borderVerts, vertCons, triList, selectedIndex);
 
@@ -141,7 +155,7 @@ public static class MeshSearching
         return result;
     }
 
-    public static void findCentreOfIsland(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, VertexConnection[] vertCons, List<List<int>> triList)
+    public static int findCentreOfIsland(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, VertexConnection[] vertCons, List<List<int>> triList)
     {
         Dictionary<int, float> islandVertDistancesFromBorder = new Dictionary<int, float>();
         for (int i = 0; i < mesh.vertices.Length; i++)
@@ -164,6 +178,7 @@ public static class MeshSearching
         mesh.vertices = updateVertPositionsFromList(findVertsOfTheSamePosition(vertCons, indexOfCentreVertex), mesh, 0, 100, 0);
         //Instantiate(new GameObject(), mesh.vertices[indexOfCentreVertex], Quaternion.identity);
         mesh.vertices = updateElevationSimple(mesh, vertBiomes, borderVerts, vertCons, triList, indexOfCentreVertex);
+        return indexOfCentreVertex;
     }
 
     public static Vector3[] updateVertPositionsFromList(List<int> vertIndexs, Mesh mesh, int xMod = 0, int yMod = 0, int zMod = 0)

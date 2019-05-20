@@ -321,12 +321,12 @@ public class VoronoiGeneration : MonoBehaviour
                 vertBiomes = MeshSearching.setVertBiomes(chunkMesh, islandHeight);
                 MeshSearching.VertexConnection[] vertCons = MeshSearching.FindAllOverLappingVert(chunkMesh);
                 List<int> borderVerts = HelperFunctions.findBorderVerts(trisList, vertBiomes, chunkMesh, BiomeType.land, BiomeType.water);
-                makeBorderVertsPink(borderVerts, chunkMesh);
-
+                //makeBorderVertsPink(borderVerts, chunkMesh);
+                int mountainIndex = int.MaxValue;
                 if (enabledElevation)
                 {
                     if (enableSlowElevationGeneration)
-                        MeshSearching.findCentreOfIsland(chunkMesh, vertBiomes, borderVerts, vertCons, trisList);
+                        mountainIndex = MeshSearching.findCentreOfIsland(chunkMesh, vertBiomes, borderVerts, vertCons, trisList);
                     else
                         MeshSearching.findCentreOfIslandSimple(chunkMesh, vertBiomes, borderVerts, vertCons, trisList);
                 }
@@ -338,8 +338,8 @@ public class VoronoiGeneration : MonoBehaviour
                     for (int i = (int)nRivers.x; i < nRiversMax; i++)
                     //for (int i = 0; i < borderVerts.Count; i++)
                     {
-                        defineRivers(chunkMesh, vertBiomes, borderVerts, vertCons, trisList, maxIterationsOfRiverSearch);
-                        //defineRiversDownwards(chunkMesh, vertBiomes, borderVerts, vertCons, trisList, maxIterationsOfRiverSearch);
+                        //defineRivers(chunkMesh, vertBiomes, borderVerts, vertCons, trisList, maxIterationsOfRiverSearch);
+                        defineRiversDownwards(chunkMesh, vertBiomes, borderVerts, vertCons, trisList, maxIterationsOfRiverSearch,mountainIndex);
                         maxIterationsOfRiverSearch -= 5;
                         if (maxIterationsOfRiverSearch <= 0)
                         {
@@ -493,19 +493,15 @@ public class VoronoiGeneration : MonoBehaviour
         //pass to line renderer
     }
 
-    public void defineRiversDownwards(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, MeshSearching.VertexConnection[] vertCons, List<List<int>> triList, int maxIterations)
+    public void defineRiversDownwards(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, MeshSearching.VertexConnection[] vertCons, List<List<int>> triList, int maxIterations, int mountainIndex)
     {
         //find a possible river
-        //print("in define rivers");
-        //printArrayIfY(mesh.vertices);
         print("River Started");
         //yield return new WaitForSeconds(0);
         //take border 
         //loop through triangles? pick heigher of 2 other verts?
         int borderEdgeIndex = borderVerts[Random.Range(0, borderVerts.Count - 1)];
         List<int> riverVertIndex = new List<int>();
-        //riverVertIndex.Add(borderVerts[borderEdgeIndex]);
-
         //this should probably be defined in a function above this so it's not looped. as this data isn't changing
         List<int> allLandIndexs = new List<int>();
         for (int i = 0; i < vertBiomes.Count; i++)
@@ -516,23 +512,31 @@ public class VoronoiGeneration : MonoBehaviour
             }
         }
 
-        int selectedLandIndex = allLandIndexs[Random.Range(0, allLandIndexs.Count)];
-        riverVertIndex.Add(selectedLandIndex);
+        if (mountainIndex == int.MaxValue)
+        {
+            int selectedLandIndex = allLandIndexs[Random.Range(0, allLandIndexs.Count)];
+            riverVertIndex.Add(selectedLandIndex);
+        }
+        else
+        {
+            riverVertIndex.Add(mountainIndex);
+        }
 
         for (int j = 0; j < maxIterations; j++)
         {
             float distance = float.MaxValue;
             float distanceToTargetPoint = float.MaxValue;
             int index = int.MaxValue;
+            float distanceFromLastPointToTarget = HelperFunctions.sqrDistance(mesh.vertices[riverVertIndex.Last()], mesh.vertices[borderEdgeIndex]);
             for (int i = 0; i < allLandIndexs.Count; i++)
             {
                 if (!riverVertIndex.Contains(allLandIndexs[i]))
                 {
                     if (HelperFunctions.hasASmallerY(mesh.vertices[riverVertIndex.Last()], mesh.vertices[allLandIndexs[i]]) || flatIsland)
                     {
-                        float distanceFromLastPoint = HelperFunctions.sqrDistance(mesh.vertices[allLandIndexs[i]], mesh.vertices[riverVertIndex.Last()]);
+                        float distanceFromLastPoint = HelperFunctions.sqrDistanceWithoutY(mesh.vertices[allLandIndexs[i]], mesh.vertices[riverVertIndex.Last()]);
                         float possibleTargetDistance = HelperFunctions.sqrDistance(mesh.vertices[allLandIndexs[i]], mesh.vertices[borderEdgeIndex]);
-                        float distanceFromLastPointToTarget = HelperFunctions.sqrDistance(mesh.vertices[riverVertIndex.Last()], mesh.vertices[borderEdgeIndex]);
+                        
                         //problem is here, as it has to both be closer in 2 unrelated distances. which isn't always possible. 
                         if (distanceFromLastPoint < distance && possibleTargetDistance < distanceFromLastPointToTarget && distanceFromLastPoint > 0)
                         {
