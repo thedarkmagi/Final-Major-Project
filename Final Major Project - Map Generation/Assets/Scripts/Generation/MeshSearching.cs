@@ -99,7 +99,7 @@ public static class MeshSearching
         return result;
     }
 
-    public static void findCentreOfIslandSimple(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, VertexConnection[] vertCons, List<List<int>> triList)
+    public static int findCentreOfIslandSimple(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, VertexConnection[] vertCons, List<List<int>> triList)
     {
         int borderVert1, borderVert2;
         borderVert1 = borderVerts[Random.Range(0, borderVerts.Count / 2)];
@@ -153,7 +153,7 @@ public static class MeshSearching
         //updateElevationOfMap(mesh, vertBiomes, borderVerts, vertCons, triList, selectedIndex);
         mesh.vertices = updateElevationSimple(mesh, vertBiomes, borderVerts, vertCons, triList, selectedIndex);
 
-
+        return selectedIndex;
     }
 
     public static Vector3 midpointFormula(Vector3 one, Vector3 two)

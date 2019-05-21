@@ -326,9 +326,28 @@ public class VoronoiGeneration : MonoBehaviour
                 if (enabledElevation)
                 {
                     if (enableSlowElevationGeneration)
+                    {
                         mountainIndex = MeshSearching.findCentreOfIsland(chunkMesh, vertBiomes, borderVerts, vertCons, trisList);
+                        Renderer textureRenderer = chunkPrefab.GetComponent<Renderer>();
+                        textureRenderer.sharedMaterial.SetFloat("MinHeight", 0);
+                        textureRenderer.sharedMaterial.SetFloat("MaxHeight", chunkMesh.vertices[mountainIndex].y);
+                    }
                     else
-                        MeshSearching.findCentreOfIslandSimple(chunkMesh, vertBiomes, borderVerts, vertCons, trisList);
+                    {
+                        int mountain = MeshSearching.findCentreOfIslandSimple(chunkMesh, vertBiomes, borderVerts, vertCons, trisList);
+                        //float currentMax=0;
+                        //for (int i = 0; i < chunkMesh.vertices.Length; i++)
+                        //{
+                        //    if(chunkMesh.vertices[i].y>currentMax)
+                        //    {
+                        //        currentMax = chunkMesh.vertices[i].y;
+                        //    }
+                        //}
+                        //Renderer textureRenderer = chunkPrefab.GetComponent<Renderer>();
+                        //textureRenderer.sharedMaterial.SetFloat("MinHeight", 0);
+                        ////textureRenderer.sharedMaterial.SetFloat("MaxHeight", chunkMesh.vertices[mountain].y);
+                        //textureRenderer.sharedMaterial.SetFloat("MaxHeight", currentMax);
+                    }
                 }
                 if(enableRivers)
                 {
@@ -348,6 +367,21 @@ public class VoronoiGeneration : MonoBehaviour
                     }
                 }
             }
+            // temporary to check how it looks
+            float currentMax = 0;
+            for (int i = 0; i < chunkMesh.vertices.Length; i++)
+            {
+                if (chunkMesh.vertices[i].y > currentMax)
+                {
+                    currentMax = chunkMesh.vertices[i].y;
+                }
+            }
+            Renderer ShaderRender = chunkPrefab.GetComponent<Renderer>();
+            ShaderRender.sharedMaterial.SetFloat("MinHeight", 0);
+            //textureRenderer.sharedMaterial.SetFloat("MaxHeight", chunkMesh.vertices[mountain].y);
+            ShaderRender.sharedMaterial.SetFloat("MaxHeight", currentMax);
+
+
             //GameObject chunk = Instantiate<GameObject>(chunkPrefab, transform.position, transform.rotation);
             GameObject rotationParent = new GameObject();
             GameObject chunk = Instantiate(chunkPrefab, new Vector3(transform.position.x + xOffSet, transform.position.y, transform.position.z + yOffSet), transform.rotation);

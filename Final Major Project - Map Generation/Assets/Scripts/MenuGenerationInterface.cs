@@ -40,6 +40,7 @@ public class MenuGenerationInterface : MonoBehaviour
     public Dropdown sizeDropdown;
     public GameObject imagePoolDropdown;
     public Toggle perlinToggle;
+    public RectTransform loadIcon;
     #endregion
 
     private GenerationSettings generationSettings;
@@ -51,6 +52,7 @@ public class MenuGenerationInterface : MonoBehaviour
     {
         generator = FindObjectOfType<VoronoiGeneration>();
         resetValues();
+        loadIcon.gameObject.SetActive(false);
         #region size values initialtion
         small.nPointsInputted = 1000;
         small.Xsize = 250;
@@ -91,6 +93,7 @@ public class MenuGenerationInterface : MonoBehaviour
     public void OnEnable()
     {
         //resetValues();
+        loadIcon.gameObject.SetActive(false);
     }
 
     public void setIslandThreshold(float input)
@@ -145,8 +148,11 @@ public class MenuGenerationInterface : MonoBehaviour
     }
     public void startGeneration()
     {
+        loadIcon.gameObject.SetActive(true);
+        //System.Threading.Thread LoadIcon = new System.Threading.Thread(new System.Threading.ThreadStart(loadingIcon(loadIcon, 0.2f)));
+       // StartCoroutine(loadingIcon(loadIcon, 0.2f));
         //this is simply a check to stop me accidently trying to generate a larger size as it'll take at least 1hour 40min to finish generating
-        if(generationSettings.useElevationSystem)
+        if (generationSettings.useElevationSystem)
         {
             selectedSizeIndex = 0;
         }
@@ -155,9 +161,22 @@ public class MenuGenerationInterface : MonoBehaviour
         Camera.main.transform.position = new Vector3(Camera.main.transform.position.x, generationSettings.chunkSize.cameraYPos, Camera.main.transform.position.z);
         generator.SetGenerationSettings(generationSettings);
         generator.StartGeneration();
+       // StopCoroutine(loadingIcon(loadIcon,0.2f));
         gameObject.SetActive(false);
     }
 
+    public void loadingIcon(RectTransform icon, float rotateStep)
+    {
+        while (icon.gameObject.activeSelf)
+        {
+            Vector3 iconAngle = icon.localEulerAngles;
+            iconAngle.z += rotateStep;
+            icon.localEulerAngles = iconAngle;
+            Debug.Log(iconAngle.z);
+        }
+            //yield return new WaitForSeconds(0.1f);
+        
+    }
 
     public void selectFile()
     {
