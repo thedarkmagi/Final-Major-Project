@@ -496,8 +496,7 @@ public class VoronoiGeneration : MonoBehaviour
     public void defineRiversDownwards(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, MeshSearching.VertexConnection[] vertCons, List<List<int>> triList, int maxIterations, int mountainIndex)
     {
         //find a possible river
-        print("River Started");
-        //yield return new WaitForSeconds(0);
+       //yield return new WaitForSeconds(0);
         //take border 
         //loop through triangles? pick heigher of 2 other verts?
         int borderEdgeIndex = borderVerts[Random.Range(0, borderVerts.Count - 1)];
@@ -567,7 +566,7 @@ public class VoronoiGeneration : MonoBehaviour
         lineRender.GetComponent<LineRenderer>().SetPositions(riverVertPositions.ToArray());
         lineRender.transform.parent = transform;
         //pass to line renderer
-        print("River Finished");
+        //print("River Finished");
     }
 
     public int checkIfIndexHasLandNextToIt(List<int> points, MeshSearching.VertexConnection[] vertCons, Dictionary<int, BiomeType> vertBiomes, List<List<int>> triList)

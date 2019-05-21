@@ -90,7 +90,7 @@ public class MenuGenerationInterface : MonoBehaviour
     }
     public void OnEnable()
     {
-        resetValues();
+        //resetValues();
     }
 
     public void setIslandThreshold(float input)

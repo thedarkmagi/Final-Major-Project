@@ -92,6 +92,12 @@ public static class HelperFunctions
             return Color.gray;
         }
     }
+    public static Color[] setVertToColor(Mesh mesh, Color color, int vertIndex)
+    {
+        Color[] newColours = mesh.colors;
+        newColours[vertIndex] = color;
+        return newColours;
+    }
     public static Color getBiomeType(Vertex vert)
     {
         Color result = new Color();

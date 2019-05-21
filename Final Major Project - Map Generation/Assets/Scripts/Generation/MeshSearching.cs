@@ -7,7 +7,7 @@ using System.Linq;
 public static class MeshSearching 
 {
     //this was 100 earlier
-    private const int mounatinYMod = 30;
+    private const int mounatinYMod = 40;
 
     public static bool findVertIndexOfAdjenctVerts(Mesh mesh, int vertIndex, List<List<int>> triList, Dictionary<int, BiomeType> vertBiomes, BiomeType targetBiome, BiomeType secondTargetBiome)
     {
@@ -141,8 +141,15 @@ public static class MeshSearching
         
         
         //selectedIndex = mesh.vertices.Length / 2;
-        selectedIndex = Random.Range(0, allLandIndexs.Count - 1);
-        mesh.vertices = updateVertPositionsFromList(findVertsOfTheSamePosition(vertCons, selectedIndex), mesh, 0, mounatinYMod, 0);
+        selectedIndex = allLandIndexs[ Random.Range(0, allLandIndexs.Count - 1)];
+
+        List<int> samePositionMountainVerts = findVertsOfTheSamePosition(vertCons, selectedIndex);
+        for (int i = 0; i < samePositionMountainVerts.Count; i++)
+        {
+            mesh.colors = HelperFunctions.setVertToColor(mesh, Color.magenta, samePositionMountainVerts[i]);
+        }
+
+        mesh.vertices = updateVertPositionsFromList(samePositionMountainVerts, mesh, 0, mounatinYMod, 0);
         //updateElevationOfMap(mesh, vertBiomes, borderVerts, vertCons, triList, selectedIndex);
         mesh.vertices = updateElevationSimple(mesh, vertBiomes, borderVerts, vertCons, triList, selectedIndex);
 
@@ -175,7 +182,12 @@ public static class MeshSearching
                 indexOfCentreVertex = item.Key;
             }
         }
-        mesh.vertices = updateVertPositionsFromList(findVertsOfTheSamePosition(vertCons, indexOfCentreVertex), mesh, 0, 100, 0);
+        List<int> samePositionMountainVerts = findVertsOfTheSamePosition(vertCons, indexOfCentreVertex);
+        for (int i = 0; i < samePositionMountainVerts.Count; i++)
+        {
+            mesh.colors = HelperFunctions.setVertToColor(mesh, Color.magenta, samePositionMountainVerts[i]);
+        }
+        mesh.vertices = updateVertPositionsFromList(samePositionMountainVerts, mesh, 0, 100, 0);
         //Instantiate(new GameObject(), mesh.vertices[indexOfCentreVertex], Quaternion.identity);
         mesh.vertices = updateElevationSimple(mesh, vertBiomes, borderVerts, vertCons, triList, indexOfCentreVertex);
         return indexOfCentreVertex;
@@ -198,38 +210,11 @@ public static class MeshSearching
         temp = new Vector3(mesh.vertices[vertIndex].x + xMod, mesh.vertices[vertIndex].y + yMod, mesh.vertices[vertIndex].z + zMod);
         return temp;
     }
-    public static Vector3[] updateElevationOfMap(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, VertexConnection[] vertCons, List<List<int>> triList, int mountainPeakVert)
+    public static Vector3 setVertY(int vertIndex, Mesh mesh, float yMod = 0)
     {
-        Vector3[] templist = mesh.vertices;
-
-        List<int> adjecentVertIndexs = new List<int>();
-        Dictionary<int, bool> hasBeenAltered = new Dictionary<int, bool>();
-        for (int k = 0; k < borderVerts.Count; k++)
-        {
-            float distance = HelperFunctions.sqrDistance(mesh.vertices[borderVerts[k]], mesh.vertices[mountainPeakVert]);
-            for (int i = 0; i < triList.Count; i++)
-            {
-                for (int j = 0; j < triList[i].Count; j++)
-                {
-                    if (triList[i].Contains(borderVerts[k]))
-                    {
-                        if (triList[i][j] != borderVerts[k])
-                        {
-                            hasBeenAltered.Add(triList[i][j], true);
-                            if (distance > HelperFunctions.sqrDistance(mesh.vertices[triList[i][j]], mesh.vertices[mountainPeakVert]))
-                            {
-                                adjecentVertIndexs.Add(triList[i][j]);
-                                adjecentVertIndexs.AddRange(findVertsOfTheSamePosition(vertCons, triList[i][j]));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        mesh.vertices = updateVertPositionsFromList(adjecentVertIndexs, mesh, 0, 100, 0);
-
-        return templist;
+        Vector3 temp;
+        temp = new Vector3(mesh.vertices[vertIndex].x, yMod, mesh.vertices[vertIndex].z );
+        return temp;
     }
 
     public static Vector3[] updateElevationSimple(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, VertexConnection[] vertCons, List<List<int>> triList, int mountainPeakVert)
@@ -238,7 +223,7 @@ public static class MeshSearching
         float currentDistance = float.MaxValue;
         int selectedIndex = 0;
 
-        float minScaledHeight = mesh.vertices[borderVerts[0]].y;
+        float minScaledHeight = mesh.vertices[0].y;
         float maxScaledHeight = mesh.vertices[mountainPeakVert].y;
         float minDistance = 0;
         float maxDistance = float.MinValue;
@@ -273,7 +258,8 @@ public static class MeshSearching
 
                         float checkedDistance = distanceBetweenAnyVertandAnyOther(mesh, mesh.vertices[mountainPeakVert], i, float.MaxValue);
                         float newHeight = HelperFunctions.normalise(checkedDistance, maxDistance, minDistance, minScaledHeight, maxScaledHeight);
-                        templist[i] = updateVertPositions(i, mesh, 0, newHeight, 0);
+                        //templist[i] = updateVertPositions(i, mesh, 0, newHeight, 0);
+                        templist[i] = setVertY(i, mesh, newHeight);
                     }
                 }
             }
@@ -351,4 +337,42 @@ public static class MeshSearching
         return verts;
     }
 
+
+    #region unused Code
+
+    public static Vector3[] updateElevationOfMap(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, VertexConnection[] vertCons, List<List<int>> triList, int mountainPeakVert)
+    {
+        Vector3[] templist = mesh.vertices;
+
+        List<int> adjecentVertIndexs = new List<int>();
+        Dictionary<int, bool> hasBeenAltered = new Dictionary<int, bool>();
+        for (int k = 0; k < borderVerts.Count; k++)
+        {
+            float distance = HelperFunctions.sqrDistance(mesh.vertices[borderVerts[k]], mesh.vertices[mountainPeakVert]);
+            for (int i = 0; i < triList.Count; i++)
+            {
+                for (int j = 0; j < triList[i].Count; j++)
+                {
+                    if (triList[i].Contains(borderVerts[k]))
+                    {
+                        if (triList[i][j] != borderVerts[k])
+                        {
+                            hasBeenAltered.Add(triList[i][j], true);
+                            if (distance > HelperFunctions.sqrDistance(mesh.vertices[triList[i][j]], mesh.vertices[mountainPeakVert]))
+                            {
+                                adjecentVertIndexs.Add(triList[i][j]);
+                                adjecentVertIndexs.AddRange(findVertsOfTheSamePosition(vertCons, triList[i][j]));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        mesh.vertices = updateVertPositionsFromList(adjecentVertIndexs, mesh, 0, 100, 0);
+
+        return templist;
+    }
+
+    #endregion
 }
