@@ -1046,8 +1046,6 @@ MonoBehaviour:
   blobsOnlyMaps:
   - {fileID: 2800000, guid: daffb7b5a79ffd141b0063601c7880b1, type: 3}
   - {fileID: 2800000, guid: ecd60a4d1811f6a4aaaf172b8694d170, type: 3}
-  - {fileID: 2800000, guid: e49c7cb48d936514fba229c0c4fe9abe, type: 3}
-  - {fileID: 2800000, guid: 3d7010f3fd205154a9ea1abb75d9f09e, type: 3}
   - {fileID: 2800000, guid: c06ffda346a05e74c865a82237292da6, type: 3}
   allOfTheImages:
   - {fileID: 2800000, guid: c06ffda346a05e74c865a82237292da6, type: 3}

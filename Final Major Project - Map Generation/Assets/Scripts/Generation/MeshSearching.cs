@@ -187,7 +187,7 @@ public static class MeshSearching
         {
             mesh.colors = HelperFunctions.setVertToColor(mesh, Color.magenta, samePositionMountainVerts[i]);
         }
-        mesh.vertices = updateVertPositionsFromList(samePositionMountainVerts, mesh, 0, 100, 0);
+        mesh.vertices = updateVertPositionsFromList(samePositionMountainVerts, mesh, 0, 60, 0);
         //Instantiate(new GameObject(), mesh.vertices[indexOfCentreVertex], Quaternion.identity);
         mesh.vertices = updateElevationSimple(mesh, vertBiomes, borderVerts, vertCons, triList, indexOfCentreVertex);
         return indexOfCentreVertex;
