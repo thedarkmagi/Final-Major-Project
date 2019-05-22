@@ -73,7 +73,7 @@ public class VoronoiGeneration : MonoBehaviour
         useCustomImage = settings.useCustomImage;
         enableSlowElevationGeneration = settings.useElevationSlow;
         enableRivers = settings.useRivers;
-
+        nRivers.y = settings.nRivers;
         nRivers.x = Mathf.FloorToInt(nRivers.x);
         nRivers.y = Mathf.FloorToInt(nRivers.y);
 

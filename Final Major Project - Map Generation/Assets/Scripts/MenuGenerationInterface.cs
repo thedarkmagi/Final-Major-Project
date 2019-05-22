@@ -19,6 +19,7 @@ public class MenuGenerationInterface : MonoBehaviour
         public bool useCustomImage;
         public bool useElevationSlow;
         public bool useRivers;
+        public int nRivers;
     }
     public struct chunkSize
     {
@@ -39,6 +40,8 @@ public class MenuGenerationInterface : MonoBehaviour
     public Slider islandThreshHold;
     public Dropdown sizeDropdown;
     public GameObject imagePoolDropdown;
+    public GameObject nRiversSlider;
+    public GameObject slowElevation;
     public Toggle perlinToggle;
     public RectTransform loadIcon;
     #endregion
@@ -53,6 +56,8 @@ public class MenuGenerationInterface : MonoBehaviour
         generator = FindObjectOfType<VoronoiGeneration>();
         resetValues();
         loadIcon.gameObject.SetActive(false);
+        nRiversSlider.SetActive(false);
+        slowElevation.SetActive(false);
         #region size values initialtion
         small.nPointsInputted = 1000;
         small.Xsize = 250;
@@ -88,7 +93,9 @@ public class MenuGenerationInterface : MonoBehaviour
         generationSettings.useCustomImage = false;
         generationSettings.nChunks = 1;
         generationSettings.selectedImagePoolIndex = 0;
+        generationSettings.nRivers = 1;
         selectedSizeIndex = 0;
+        
     }
     public void OnEnable()
     {
@@ -103,6 +110,10 @@ public class MenuGenerationInterface : MonoBehaviour
     public void setNChunks(float input)
     {
         generationSettings.nChunks =Mathf.FloorToInt(input);
+    }
+    public void setNRivers(float input)
+    {
+        generationSettings.nRivers =Mathf.FloorToInt(input);
     }
     public void setSelectedSize()
     {
@@ -124,6 +135,7 @@ public class MenuGenerationInterface : MonoBehaviour
     public void setUseElevation(bool input)
     {
         generationSettings.useElevationSystem = input;
+        slowElevation.SetActive(input);
     }
     public void setUseElevationSlow(bool input)
     {
@@ -132,6 +144,7 @@ public class MenuGenerationInterface : MonoBehaviour
     public void setUseRivers(bool input)
     {
         generationSettings.useRivers = input;
+        nRiversSlider.SetActive(input);
     }
     public void setUsePerlin(bool input)
     {
@@ -175,7 +188,6 @@ public class MenuGenerationInterface : MonoBehaviour
             Debug.Log(iconAngle.z);
         }
             //yield return new WaitForSeconds(0.1f);
-        
     }
 
     public void selectFile()
