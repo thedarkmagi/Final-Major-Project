@@ -171,16 +171,10 @@ public class VoronoiGeneration : MonoBehaviour
 
                 sample = circleGradient.GetPixel(x, y).grayscale;
             }
-            if (sample > 0)
-            {
-                //print("vertex: " + i + " X:" + x + " Y:" + y + " Sampled value: " + sample);
-            }
             sample = defineIsland(sample, mesh.vertices[i]);
             
             elevations.Add(sample);
         }
-        //print("Max X: " + maxX + " Max Y: " + maxY);
-        //findMountainPeak(mesh.vertices);
 
         Renderer textureRenderer = chunkPrefab.GetComponent<Renderer>();
         textureRenderer.sharedMaterial.SetFloat("MinHeight", 0);
@@ -398,15 +392,7 @@ public class VoronoiGeneration : MonoBehaviour
         
     }
 
-    public void makeBorderVertsPink(List<int> borderVerts, Mesh mesh)
-    {
-        Color[] newColours = mesh.colors;
-        for (int i = 0; i < borderVerts.Count; i++)
-        {
-            newColours[borderVerts[i]] = Color.magenta;
-        }
-        mesh.colors = newColours;
-    }
+   
 
     public void defineRivers(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, MeshSearching.VertexConnection[] vertCons, List<List<int>> triList, int maxIterations)
     {
@@ -577,10 +563,6 @@ public class VoronoiGeneration : MonoBehaviour
                             distanceToTargetPoint = possibleTargetDistance;
                             index = allLandIndexs[i];
                         }
-                        //if(possibleTargetDistance<=0)
-                        //{
-                        //    break;
-                        //}
                     }
                 }
             }
@@ -599,10 +581,9 @@ public class VoronoiGeneration : MonoBehaviour
         lineRender.GetComponent<LineRenderer>().positionCount = riverVertPositions.Count;
         lineRender.GetComponent<LineRenderer>().SetPositions(riverVertPositions.ToArray());
         lineRender.transform.parent = transform;
-        //pass to line renderer
-        //print("River Finished");
     }
 
+    #region unused code
     public int checkIfIndexHasLandNextToIt(List<int> points, MeshSearching.VertexConnection[] vertCons, Dictionary<int, BiomeType> vertBiomes, List<List<int>> triList)
     {
         int result = int.MaxValue;
@@ -625,13 +606,6 @@ public class VoronoiGeneration : MonoBehaviour
                                 result = triList[i][j];
                                 break;
                             }
-                            else
-                            {
-                                //print("Reccursion Is a Curse");
-                                //points.Clear();
-                                //points.AddRange(findVertsOfTheSamePosition(vertCons,triList[i][j]));
-                                //checkIfIndexHasLandNextToIt(points, vertCons, vertBiomes, triList);
-                            }
                         }
                     }
 
@@ -640,6 +614,18 @@ public class VoronoiGeneration : MonoBehaviour
         }
         return result;
     }
+
+    public void makeBorderVertsPink(List<int> borderVerts, Mesh mesh)
+    {
+        Color[] newColours = mesh.colors;
+        for (int i = 0; i < borderVerts.Count; i++)
+        {
+            newColours[borderVerts[i]] = Color.magenta;
+        }
+        mesh.colors = newColours;
+    }
+
+    #endregion 
 
     #region Custom Print Functions
     public void printList<T>(List<T> list)
