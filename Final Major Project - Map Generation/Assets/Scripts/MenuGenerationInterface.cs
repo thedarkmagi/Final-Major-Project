@@ -93,7 +93,7 @@ public class MenuGenerationInterface : MonoBehaviour
         generationSettings.useCustomImage = false;
         generationSettings.nChunks = 1;
         generationSettings.selectedImagePoolIndex = 0;
-        generationSettings.nRivers = 1;
+        generationSettings.nRivers = 6;
         selectedSizeIndex = 0;
         
     }
