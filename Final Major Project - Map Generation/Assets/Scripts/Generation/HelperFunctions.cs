@@ -6,7 +6,7 @@ using TriangleNet.Topology;
 using System.Linq;
 public static class HelperFunctions
 {
-
+    
     public static float normalise(float number, float min, float max, float scaledMin, float scaledMax)
     {
         float result = (scaledMax - scaledMin) * (number - min) / (max - min) + scaledMin;
@@ -61,7 +61,6 @@ public static class HelperFunctions
         {
             if (MeshSearching.findVertIndexOfAdjenctVerts(mesh, i, triList, vertBiomes, targetBiome, secondTargetBiome))
             {
-                //print("inside the loop " + i);
                 borderVerts.Add(i);
             }
         }
@@ -69,7 +68,7 @@ public static class HelperFunctions
         return borderVerts;
     }
 
-    /* Returns a point's local coordinates. */
+    // Returns a point's local coordinates. 
     public static Vector3 GetPoint3D(int index, TriangleNet.Mesh mesh, List<float> elevations)
     {
         Vertex vertex = mesh.vertices[index];

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    private Camera camera;
+    private Camera localCamera;
     private MouseInput mouseInput;
     public float FOVMin,FOVMax;
     public float FOVChangeAmount;
@@ -17,18 +17,18 @@ public class CameraController : MonoBehaviour
     void Start()
     {
         mouseInput = GetComponent<MouseInput>();
-        camera = GetComponent<Camera>();
+        localCamera = GetComponent<Camera>();
         screenWidth = Screen.width;
         screenHeight = Screen.height;
     }
 
     //+z is up +x is right 
-    //field of view to zoom??? seemed like it worked 
-    //UI will need scaling depending on field of view. 
+    //field of view to zoom
+    //UI scales depending on field of view. 
     // Update is called once per frame
     void Update()
     {
-
+        #region Zooming in and out with scroll wheel
         if (Input.mouseScrollDelta.y > 0)
         {
             FOVChange(-FOVChangeAmount);
@@ -37,7 +37,12 @@ public class CameraController : MonoBehaviour
         {
             FOVChange(FOVChangeAmount);
         }
-
+        if (Input.mouseScrollDelta != Vector2.zero)
+        {
+            updateScales();
+        }
+        #endregion
+        #region Screen Scrolling
         modifyPosition = Vector3.zero;
         if (Input.mousePosition.x > screenWidth * maxBoundary)
         {
@@ -58,17 +63,15 @@ public class CameraController : MonoBehaviour
         }
 
         gameObject.transform.position += modifyPosition;
-        if(Input.mouseScrollDelta != Vector2.zero)
-        {
-            updateScales();
-        }
+        #endregion
+        
     }
-
+    //This is used for zooming in
     void FOVChange(float modifier)
     {
-        if (camera.fieldOfView + modifier <= FOVMax && camera.fieldOfView + modifier >= FOVMin)
+        if (localCamera.fieldOfView + modifier <= FOVMax && localCamera.fieldOfView + modifier >= FOVMin)
         {
-            camera.fieldOfView += modifier;
+            localCamera.fieldOfView += modifier;
         }
     }
 
@@ -77,10 +80,10 @@ public class CameraController : MonoBehaviour
         float result = (scaledMax - scaledMin) * (number - FOVMin) / (FOVMax - FOVMin) + scaledMin;
         return result;
     }
-
+    //update UI scales to ensure it can be seen
     void updateScales()
     {
-        float scaleMod = normalise(camera.fieldOfView);
+        float scaleMod = normalise(localCamera.fieldOfView);
         for (int i = 0; i < mouseInput.allButtons.Count; i++)
         {
             mouseInput.allButtons[i].updateScale(scaleMod);

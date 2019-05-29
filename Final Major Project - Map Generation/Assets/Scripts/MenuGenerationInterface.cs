@@ -34,6 +34,9 @@ public class MenuGenerationInterface : MonoBehaviour
         // 248 is what it used to be for the small size. 
     }
 
+    private const int defaultNumberOfRivers = 6;
+    private const float defaultIslandThreshold = 0.5f;
+
     #region references 
     private VoronoiGeneration generator;
 
@@ -84,7 +87,7 @@ public class MenuGenerationInterface : MonoBehaviour
 
     public void resetValues()
     {
-        generationSettings.islandThreshHold = 0.5f;
+        generationSettings.islandThreshHold = defaultIslandThreshold;
         generationSettings.useImagePool = true;
         generationSettings.useElevationSystem = false;
         generationSettings.useElevationSlow = false;
@@ -93,16 +96,15 @@ public class MenuGenerationInterface : MonoBehaviour
         generationSettings.useCustomImage = false;
         generationSettings.nChunks = 1;
         generationSettings.selectedImagePoolIndex = 0;
-        generationSettings.nRivers = 6;
+        generationSettings.nRivers = defaultNumberOfRivers;
         selectedSizeIndex = 0;
         
     }
     public void OnEnable()
     {
-        //resetValues();
         loadIcon.gameObject.SetActive(false);
     }
-
+    #region functions for UI interaction
     public void setIslandThreshold(float input)
     {
         generationSettings.islandThreshHold = input;
@@ -151,7 +153,6 @@ public class MenuGenerationInterface : MonoBehaviour
         generationSettings.usePerlin = input;
         if(generationSettings.useImagePool && input)
         {
-            //generationSettings.useImagePool = false;
             imagePoolDropdown.GetComponentInParent<Toggle>().isOn = false;
         }
     }
@@ -161,10 +162,7 @@ public class MenuGenerationInterface : MonoBehaviour
     }
     public void startGeneration()
     {
-        loadIcon.gameObject.SetActive(true);
-        //System.Threading.Thread LoadIcon = new System.Threading.Thread(new System.Threading.ThreadStart(loadingIcon(loadIcon, 0.2f)));
-       // StartCoroutine(loadingIcon(loadIcon, 0.2f));
-        //this is simply a check to stop me accidently trying to generate a larger size as it'll take at least 1hour 40min to finish generating
+        //this is simply a check to stop the user accidently trying to generate a larger size as it'll take at least 1hour 40min to finish generating or simply crash the program
         if (generationSettings.useElevationSystem)
         {
             selectedSizeIndex = 0;
@@ -174,20 +172,7 @@ public class MenuGenerationInterface : MonoBehaviour
         Camera.main.transform.position = new Vector3(Camera.main.transform.position.x, generationSettings.chunkSize.cameraYPos, Camera.main.transform.position.z);
         generator.SetGenerationSettings(generationSettings);
         generator.StartGeneration();
-       // StopCoroutine(loadingIcon(loadIcon,0.2f));
         gameObject.SetActive(false);
-    }
-
-    public void loadingIcon(RectTransform icon, float rotateStep)
-    {
-        while (icon.gameObject.activeSelf)
-        {
-            Vector3 iconAngle = icon.localEulerAngles;
-            iconAngle.z += rotateStep;
-            icon.localEulerAngles = iconAngle;
-            Debug.Log(iconAngle.z);
-        }
-            //yield return new WaitForSeconds(0.1f);
     }
 
     public void selectFile()
@@ -205,6 +190,7 @@ public class MenuGenerationInterface : MonoBehaviour
             generator.customImage = tex;
             generationSettings.useCustomImage = true;
         }
-        
+
     }
+    #endregion
 }

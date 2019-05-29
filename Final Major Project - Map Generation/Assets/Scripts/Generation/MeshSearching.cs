@@ -8,6 +8,7 @@ public static class MeshSearching
 {
     //this was 100 earlier
     private const int mounatinYMod = 40;
+    private const int slowGenerationMounatinHeight = 60;
 
     public static bool findVertIndexOfAdjenctVerts(Mesh mesh, int vertIndex, List<List<int>> triList, Dictionary<int, BiomeType> vertBiomes, BiomeType targetBiome, BiomeType secondTargetBiome)
     {
@@ -71,7 +72,6 @@ public static class MeshSearching
             {
                 biomeOne = true;
                 BiomeType temp = vertBiomes[adjecentVertIndexs[i]];
-                //print("tempCheck " + temp + " secondBiome target " + secondTargetBiome);
                 if (temp == secondTargetBiome)
                 {
                     biomeTwo = true;
@@ -81,7 +81,6 @@ public static class MeshSearching
             {
                 biomeTwo = true;
                 BiomeType temp = vertBiomes[adjecentVertIndexs[i]];
-                //print("tempCheck " + temp + " FirstBiome target " + targetBiome);
                 if (temp == targetBiome)
                 {
                     biomeOne = true;
@@ -90,7 +89,6 @@ public static class MeshSearching
 
             if (biomeOne && biomeTwo)
             {
-                //print("TransitionFound <3");
                 result = true;
                 break;
             }
@@ -104,31 +102,8 @@ public static class MeshSearching
         int borderVert1, borderVert2;
         borderVert1 = borderVerts[Random.Range(0, borderVerts.Count / 2)];
         borderVert2 = borderVerts[Random.Range(borderVerts.Count / 2, borderVerts.Count)];
-        //borderVert1 = borderVerts[0];
-        //borderVert2 = borderVerts[borderVerts.Count-1];
         Vector3 midpoint = midpointFormula(mesh.vertices[borderVert1], mesh.vertices[borderVert2]);
-        float currentDistance = float.MaxValue;
         int selectedIndex = 0;
-        //for (int i = 0; i < mesh.vertices.Length; i++)
-        //{
-        //    if (vertBiomes[i] == BiomeType.land)
-        //    {
-        //        //islandVertDistancesFromBorder[i] = distanceBetweenBorderVertandAnyOther(mesh, i, borderVerts);
-        //        float checkedDistance = distanceBetweenAnyVertandAnyOther(mesh, midpoint, i, currentDistance);
-        //        if(checkedDistance!=currentDistance)
-        //        {
-        //            selectedIndex = i;
-        //            currentDistance = checkedDistance;
-        //        }
-        //    }
-        //}
-        //do
-        //{
-        //    selectedIndex = Random.Range(0, mesh.vertices.Length);
-        //    if (!borderVerts.Contains(selectedIndex) && vertBiomes[selectedIndex] == BiomeType.land)
-        //        break;
-        //}
-        //while (borderVerts.Contains(selectedIndex) && vertBiomes[selectedIndex] != BiomeType.land);
 
         List<int> allLandIndexs = new List<int>();
         for (int i = 0; i < vertBiomes.Count; i++)
@@ -139,8 +114,6 @@ public static class MeshSearching
             }
         }
         
-        
-        //selectedIndex = mesh.vertices.Length / 2;
         selectedIndex = allLandIndexs[ Random.Range(0, allLandIndexs.Count - 1)];
 
         List<int> samePositionMountainVerts = findVertsOfTheSamePosition(vertCons, selectedIndex);
@@ -150,7 +123,6 @@ public static class MeshSearching
         }
 
         mesh.vertices = updateVertPositionsFromList(samePositionMountainVerts, mesh, 0, mounatinYMod, 0);
-        //updateElevationOfMap(mesh, vertBiomes, borderVerts, vertCons, triList, selectedIndex);
         mesh.vertices = updateElevationSimple(mesh, vertBiomes, borderVerts, vertCons, triList, selectedIndex);
 
         return selectedIndex;
@@ -187,7 +159,7 @@ public static class MeshSearching
         {
             mesh.colors = HelperFunctions.setVertToColor(mesh, Color.magenta, samePositionMountainVerts[i]);
         }
-        mesh.vertices = updateVertPositionsFromList(samePositionMountainVerts, mesh, 0, 60, 0);
+        mesh.vertices = updateVertPositionsFromList(samePositionMountainVerts, mesh, 0, slowGenerationMounatinHeight, 0);
         //Instantiate(new GameObject(), mesh.vertices[indexOfCentreVertex], Quaternion.identity);
         mesh.vertices = updateElevationSimple(mesh, vertBiomes, borderVerts, vertCons, triList, indexOfCentreVertex);
         return indexOfCentreVertex;
@@ -220,8 +192,6 @@ public static class MeshSearching
     public static Vector3[] updateElevationSimple(Mesh mesh, Dictionary<int, BiomeType> vertBiomes, List<int> borderVerts, VertexConnection[] vertCons, List<List<int>> triList, int mountainPeakVert)
     {
         Vector3[] templist = mesh.vertices;
-        float currentDistance = float.MaxValue;
-        int selectedIndex = 0;
 
         float minScaledHeight = mesh.vertices[0].y;
         float maxScaledHeight = mesh.vertices[mountainPeakVert].y;
@@ -245,7 +215,6 @@ public static class MeshSearching
         {
             excludedVerts.AddRange(findVertsOfTheSamePosition(vertCons, borderVerts[i]));
         }
-        //excludedVerts.AddRange(borderVerts);
         excludedVerts.AddRange(findVertsOfTheSamePosition(vertCons, mountainPeakVert));
         for (int i = 0; i < mesh.vertices.Length; i++)
         {
@@ -258,7 +227,6 @@ public static class MeshSearching
 
                         float checkedDistance = distanceBetweenAnyVertandAnyOther(mesh, mesh.vertices[mountainPeakVert], i, float.MaxValue);
                         float newHeight = HelperFunctions.normalise(checkedDistance, maxDistance, minDistance, minScaledHeight, maxScaledHeight);
-                        //templist[i] = updateVertPositions(i, mesh, 0, newHeight, 0);
                         templist[i] = setVertY(i, mesh, newHeight);
                     }
                 }
